@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=Plants vs. Zombies
+Name[zh_CN]=植物大战僵尸
+Exec=/opt/pvz-portable/pvz-portable
+StartupNotify=true
+Terminal=false
+Icon=/opt/pvz-portable/icon.png
+Type=Application
+Categories=Game;
+Comment=Plants vs. Zombies: Game of the Year Edition
+Comment[zh_CN]=植物大战僵尸：年度版

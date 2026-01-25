@@ -1,0 +1,13 @@
+Package: pvz-protable
+Version: 0.1.0+deb12u1
+Priority: optional
+Section: games
+Architecture: amd64
+Maintainer: wszqkzqk <wszqkzqk@qq.com>
+Depends: libc6, libgcc-s1, libstdc++6, libglew2.2, libjpeg62-turbo, libogg0, libopenmpt0, libpng16-16, libvorbis0a, libvorbisenc2, libvorbisfile3, libsdl2-2.0-0, libmpg123-0
+Homepage: https://github.com/wszqkzqk/PvZ-Portable
+Description: A cross-platform community-driven reimplementation of Plants vs. Zombies: Game of the Year Edition
+  This repository does NOT contain any copyrighted game assets (such as images, 
+  music, or levels) owned by PopCap Games or Electronic Arts. Users must provide
+  their own main.pak and properties/ folder from a legally purchased copy of
+  Plants vs. Zombies: GOTY Edition and place into the program directory.
