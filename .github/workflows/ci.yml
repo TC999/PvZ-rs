@@ -78,6 +78,7 @@ jobs:
       run: |
         apt update
         apt install -y \
+          sudo \
           build-essential \
           cmake \
           ninja-build \
