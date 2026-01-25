@@ -114,7 +114,7 @@ jobs:
           cp build/pvz-portable debian/opt/pvz-portable/
 
           mkdir dist
-          dpkg-deb -b ./dist/pvz-portable_0.1.0+deb12u1_amd64.deb ./debian/
+          dpkg-deb -b ./debian ./dist/pvz-portable_0.1.0+deb12u1_amd64.deb
         '
 
     - name: Upload Artifact
