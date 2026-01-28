@@ -223,24 +223,17 @@ std::wstring Sexy::StringToWString(const std::string &theString)
 
 std::string Sexy::WStringToString(const std::wstring &theString)
 {
-	size_t aRequiredLength = wcstombs( NULL, theString.c_str(), 0 );
-	if (aRequiredLength < 16384)
+	std::string aStr;
+	for (auto s : theString)
 	{
-		char aBuffer[16384];
-		wcstombs( aBuffer, theString.c_str(), 16384 );
-		return std::string(aBuffer);
+		if ((int)s > 255)
+			aStr += (char)s, aStr += (char)(s >> 8);
+		else if (!s)
+			break;
+		else
+			aStr += (char)s;
 	}
-	else
-	{
-		DBG_ASSERTE(aRequiredLength != (size_t)-1);
-		if (aRequiredLength == (size_t)-1) return "";
-
-		char* aBuffer = new char[aRequiredLength+1];
-		wcstombs( aBuffer, theString.c_str(), aRequiredLength+1 );
-		std::string aStr = aBuffer;
-		delete[] aBuffer;
-		return aStr;
-	}
+	return aStr;
 }
 
 SexyString Sexy::StringToSexyString(const std::string& theString)
