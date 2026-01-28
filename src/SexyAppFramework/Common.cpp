@@ -1,8 +1,8 @@
 #include "Common.h"
 #include "misc/MTRand.h"
 #include "misc/Debug.h"
-#include <locale>
-#include <codecvt>
+#include <iterator>
+#include <utf8.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <errno.h>
@@ -214,36 +214,40 @@ std::wstring Sexy::StringToLower(const std::wstring& theString)
 
 std::wstring Sexy::StringToWString(const std::string &theString)
 {
-	try
+	std::string aClean;
+	aClean.reserve(theString.size());
+	utf8::replace_invalid(theString.begin(), theString.end(), std::back_inserter(aClean));
+	if constexpr (sizeof(wchar_t) == 2)
 	{
-		std::wstring_convert<std::codecvt_utf8<wchar_t>> aConv;
-		return aConv.from_bytes(theString);
+		std::u16string aTmp;
+		aTmp.reserve(aClean.size());
+		utf8::utf8to16(aClean.begin(), aClean.end(), std::back_inserter(aTmp));
+		return std::wstring(aTmp.begin(), aTmp.end());
 	}
-	catch (const std::range_error&)
+	else
 	{
-		std::wstring aFallback;
-		aFallback.reserve(theString.length());
-		for (size_t i = 0; i < theString.length(); i++)
-			aFallback += (unsigned char)theString[i];
-		return aFallback;
+		std::u32string aTmp;
+		aTmp.reserve(aClean.size());
+		utf8::utf8to32(aClean.begin(), aClean.end(), std::back_inserter(aTmp));
+		return std::wstring(aTmp.begin(), aTmp.end());
 	}
 }
 
 std::string Sexy::WStringToString(const std::wstring &theString)
 {
-	try
+	std::string aOut;
+	aOut.reserve(theString.size());
+	if constexpr (sizeof(wchar_t) == 2)
 	{
-		std::wstring_convert<std::codecvt_utf8<wchar_t>> aConv;
-		return aConv.to_bytes(theString);
+		std::u16string aTmp(theString.begin(), theString.end());
+		utf8::utf16to8(aTmp.begin(), aTmp.end(), std::back_inserter(aOut));
 	}
-	catch (const std::range_error&)
+	else
 	{
-		std::string aFallback;
-		aFallback.reserve(theString.length());
-		for (auto ch : theString)
-			aFallback += (ch <= 0xFF) ? (char)ch : '?';
-		return aFallback;
+		std::u32string aTmp(theString.begin(), theString.end());
+		utf8::utf32to8(aTmp.begin(), aTmp.end(), std::back_inserter(aOut));
 	}
+	return aOut;
 }
 
 SexyString Sexy::StringToSexyString(const std::string& theString)
@@ -1399,8 +1403,7 @@ bool Sexy::StrPrefixNoCase(const char *theStr, const char *thePrefix, int maxLen
 
 std::wstring Sexy::UTF8StringToWString(const std::string theString)
 {
-	std::wstring_convert<std::codecvt_utf8<wchar_t> > cv;
-	return cv.from_bytes(theString);
+	return StringToWString(theString);
 	/*
 	int size = MultiByteToWideChar(CP_UTF8, 0, theString.c_str(), theString.length() + 1, nullptr, 0);
 	wchar_t* buffer = new wchar_t[size];

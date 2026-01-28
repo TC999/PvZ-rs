@@ -14,8 +14,6 @@
 
 #ifdef __SWITCH__
 #include <switch.h>
-#include <locale>
-#include <codecvt>
 #elif defined(__3DS__)
 #include <3ds.h>
 #endif
@@ -2930,9 +2928,8 @@ int SexyAppBase::MsgBox(const std::wstring& theText, const std::wstring& theTitl
 	wprintf(L"%s\n===\n%s\n", theTitle.c_str(), theText.c_str());
 
 #ifdef __SWITCH__
-	std::wstring_convert<std::codecvt_utf8<wchar_t> > cv;
 	ErrorApplicationConfig c;
-	errorApplicationCreate(&c, cv.to_bytes(theTitle).c_str(), cv.to_bytes(theText).c_str());
+	errorApplicationCreate(&c, WStringToString(theTitle).c_str(), WStringToString(theText).c_str());
 	errorApplicationShow(&c);
 #endif
 
@@ -2975,9 +2972,8 @@ void SexyAppBase::Popup(const std::wstring& theString)
 		wprintf(L"FATAL ERROR\n===\n%s\n", theString.c_str());
 
 #ifdef __SWITCH__
-	std::wstring_convert<std::codecvt_utf8<wchar_t> > cv;
 	ErrorApplicationConfig c;
-	errorApplicationCreate(&c, "Fatal error", cv.to_bytes(theString).c_str());
+	errorApplicationCreate(&c, "Fatal error", WStringToString(theString).c_str());
 	errorApplicationShow(&c);
 #endif
 

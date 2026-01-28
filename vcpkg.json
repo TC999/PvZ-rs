@@ -8,6 +8,7 @@
     "libpng",
     "libvorbis",
     "mpg123",
+    "utf8cpp",
     "pthreads",
     "sdl2",
     "sdl2-mixer",

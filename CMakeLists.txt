@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5...4.0)
+cmake_minimum_required(VERSION 3.11...4.0)
 
 project(pvz-portable LANGUAGES C CXX ASM)
 
@@ -120,6 +120,12 @@ find_package(JPEG REQUIRED)
 find_package(PNG REQUIRED)
 find_package(SDL2 REQUIRED)
 find_package(OpenGL REQUIRED)
+find_package(utf8cpp CONFIG QUIET)
+if (NOT TARGET utf8cpp::utf8cpp AND NOT TARGET utf8cpp)
+	include(FetchContent)
+	FetchContent_Declare(utf8cpp URL https://github.com/nemtrif/utfcpp/archive/refs/tags/v4.0.5.tar.gz)
+	FetchContent_MakeAvailable(utf8cpp)
+endif()
 if (NOT NO_GLEW)
 	find_package(GLEW REQUIRED)
 endif()
@@ -146,6 +152,13 @@ target_include_directories(pvz-portable PRIVATE
 	${SDL2_INCLUDE_DIRS}
 	${PLAT_INCLUDES}
 )
+if (TARGET utf8cpp::utf8cpp)
+	target_link_libraries(pvz-portable PRIVATE utf8cpp::utf8cpp)
+elseif (TARGET utf8cpp)
+	target_link_libraries(pvz-portable PRIVATE utf8cpp)
+else()
+	message(FATAL_ERROR "utf8cpp target not available")
+endif()
 if(MSVC)
 	target_include_directories(pvz-portable PRIVATE ${DIRENT_INCLUDE_DIRS})
 endif()

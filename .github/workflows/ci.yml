@@ -36,7 +36,8 @@ jobs:
           mpg123 \
           ninja \
           sdl2-compat \
-          sudo
+          sudo \
+          utf8cpp
 
     - name: Create Builder User
       run: |
@@ -92,6 +93,7 @@ jobs:
           mingw-w64-ucrt-x86_64-ninja
           mingw-w64-ucrt-x86_64-ntldd
           mingw-w64-ucrt-x86_64-SDL2
+          mingw-w64-ucrt-x86_64-utf8cpp
 
     - name: Compile PvZ-Portable for Windows
       shell: msys2 {0}
@@ -215,7 +217,8 @@ jobs:
           libvorbis \
           mpg123 \
           ninja \
-          sdl2
+          sdl2 \
+          utf8cpp
 
     - name: Build PvZ-Portable
       run: |
