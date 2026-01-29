@@ -4,16 +4,24 @@ on:
   push:
     branches: [ "main" ]
     tags: [ "*" ]
-  pull_request:
-    branches: [ "main" ]
+  issue_comment:
+    types: [ created ]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
+  precheck:
+    name: Precheck
+    if: github.event_name == 'push' || (github.event_name == 'issue_comment' && github.event.issue.pull_request && contains(github.event.comment.body, '/run-ci'))
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "precheck ok"
+
   build-archlinux:
     name: Build for Arch Linux (x86_64)
+    needs: precheck
     runs-on: ubuntu-latest
     container: archlinux:latest
     steps:
@@ -68,6 +76,7 @@ jobs:
 
   build-windows-msys2-ucrt64:
     name: Build for Windows (MSYS2 UCRT64)
+    needs: precheck
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v4
@@ -126,6 +135,7 @@ jobs:
 
   build-windows-msvc-x64:
     name: Build for Windows (MSVC x64)
+    needs: precheck
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v4
@@ -160,6 +170,7 @@ jobs:
 
   build-switch:
     name: Build for Switch
+    needs: precheck
     runs-on: ubuntu-latest
     container:
       image: devkitpro/devkita64:latest
@@ -196,6 +207,7 @@ jobs:
 
   build-macos:
     name: Build for macOS (aarch64)
+    needs: precheck
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v4
