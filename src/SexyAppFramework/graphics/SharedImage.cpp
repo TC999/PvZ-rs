@@ -4,36 +4,35 @@
 
 using namespace Sexy;
 
-SharedImage::SharedImage()
+SharedImage::SharedImage() :
+	mImage(nullptr),
+	mRefCount(0)
 {
-	mImage = NULL;
-	mRefCount = 0;
 }
 
-SharedImageRef::SharedImageRef(const SharedImageRef& theSharedImageRef)
+SharedImageRef::SharedImageRef(const SharedImageRef& theSharedImageRef) :
+	mSharedImage(theSharedImageRef.mSharedImage),
+	mUnsharedImage(theSharedImageRef.mUnsharedImage),
+	mOwnsUnshared(false)
 {
-	mSharedImage = theSharedImageRef.mSharedImage;
-	if (mSharedImage != NULL)
-		mSharedImage->mRefCount++;
-	mUnsharedImage = theSharedImageRef.mUnsharedImage;	
-	mOwnsUnshared = false;
+	if (mSharedImage)
+		mSharedImage->mRefCount.fetch_add(1, std::memory_order_relaxed);
 }
 
-SharedImageRef::SharedImageRef()
+SharedImageRef::SharedImageRef() :
+	mSharedImage(nullptr),
+	mUnsharedImage(nullptr),
+	mOwnsUnshared(false)
 {
-	mSharedImage = NULL;
-	mUnsharedImage = NULL;
-	mOwnsUnshared = false;
 }
 
-SharedImageRef::SharedImageRef(SharedImage* theSharedImage)
+SharedImageRef::SharedImageRef(SharedImage* theSharedImage) :
+	mSharedImage(theSharedImage),
+	mUnsharedImage(nullptr),
+	mOwnsUnshared(false)
 {
-	mSharedImage = theSharedImage;
-	if (theSharedImage != NULL)
-		mSharedImage->mRefCount++;
-
-	mUnsharedImage = NULL;
-	mOwnsUnshared = false;
+	if (mSharedImage)
+		mSharedImage->mRefCount.fetch_add(1, std::memory_order_relaxed);
 }
 
 SharedImageRef::~SharedImageRef()
@@ -42,65 +41,71 @@ SharedImageRef::~SharedImageRef()
 }
 
 void SharedImageRef::Release()
-{	
+{
 	if (mOwnsUnshared)
 		delete mUnsharedImage;
-	mUnsharedImage = NULL;
-	if (mSharedImage != NULL)
+	mUnsharedImage = nullptr;
+
+	if (mSharedImage)
 	{
-		if (--mSharedImage->mRefCount == 0)
-			gSexyAppBase->mCleanupSharedImages = true;
+		if (mSharedImage->mRefCount.fetch_sub(1, std::memory_order_acq_rel) == 1)
+		{
+			if (gSexyAppBase)
+				gSexyAppBase->mCleanupSharedImages = true;
+		}
 	}
-	mSharedImage = NULL;
+	mSharedImage = nullptr;
 }
 
 SharedImageRef& SharedImageRef::operator=(const SharedImageRef& theSharedImageRef)
 {
+	if (this == &theSharedImageRef)
+		return *this;
+
 	Release();
 	mSharedImage = theSharedImageRef.mSharedImage;
-	if (mSharedImage != NULL)
-		mSharedImage->mRefCount++;
+	if (mSharedImage)
+		mSharedImage->mRefCount.fetch_add(1, std::memory_order_relaxed);
+	mUnsharedImage = theSharedImageRef.mUnsharedImage;
+	mOwnsUnshared = false;
+
 	return *this;
 }
 
-SharedImageRef&	SharedImageRef::operator=(SharedImage* theSharedImage)
+SharedImageRef& SharedImageRef::operator=(SharedImage* theSharedImage)
 {
 	Release();
 	mSharedImage = theSharedImage;
-	mSharedImage->mRefCount++;
+	if (mSharedImage)
+		mSharedImage->mRefCount.fetch_add(1, std::memory_order_relaxed);
 	return *this;
 }
 
 SharedImageRef& SharedImageRef::operator=(MemoryImage* theUnsharedImage)
 {
 	Release();
-	mUnsharedImage = theUnsharedImage;	
+	mUnsharedImage = theUnsharedImage;
 	return *this;
 }
 
 MemoryImage* SharedImageRef::operator->()
 {
-	return (MemoryImage*) *this;
+	return static_cast<MemoryImage*>(*this);
 }
 
-
 SharedImageRef::operator Image*()
-{	
-	return (MemoryImage*) *this;
+{
+	return static_cast<MemoryImage*>(*this);
 }
 
 SharedImageRef::operator MemoryImage*()
 {
-	if (mUnsharedImage != NULL)
+	if (mUnsharedImage)
 		return mUnsharedImage;
-	else
-		return (GLImage*) *this;
+	return static_cast<GLImage*>(*this);
 }
 
 SharedImageRef::operator GLImage*()
 {
-	if (mSharedImage != NULL)
-		return mSharedImage->mImage;
-	else
-		return NULL;
+	return mSharedImage ? mSharedImage->mImage : nullptr;
 }
