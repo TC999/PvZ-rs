@@ -206,3 +206,8 @@ elseif (NINTENDO_3DS)
 		SMDH pvz-portable.smdh
 	)
 endif()
+
+install(TARGETS pvz-portable
+	RUNTIME DESTINATION bin
+	BUNDLE DESTINATION bin
+)
