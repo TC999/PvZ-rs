@@ -686,7 +686,7 @@ void TextureData::Blt(float theX, float theY, const Rect& theSrcRect, const Colo
 	int srcBottom = srcTop  + theSrcRect.mHeight;
 	if (srcLeft >= srcRight || srcTop >= srcBottom) return;
 
-	uint32_t aColor = ArgbToRgba(theColor.ToInt());
+	uint32_t aColor = theColor.ToGLColor();
 	glActiveTexture(GL_TEXTURE0);
 	glUniform1i(gUfUseTexture, 1);
 
@@ -835,7 +835,7 @@ void TextureData::BltTransformed(const SexyMatrix3 &theTrans, const Rect& theSrc
 		pixelcorrect = 0.0f;
 	}
 
-	uint32_t aColor = ArgbToRgba(theColor.ToInt());
+	uint32_t aColor = theColor.ToGLColor();
 	glActiveTexture(GL_TEXTURE0);
 	glUniform1i(gUfUseTexture, 1);
 
@@ -1364,7 +1364,7 @@ void GLInterface::DrawLine(double x1, double y1, double x2, double y2,
 	}
 
 	glUniform1i(gUfUseTexture, 0);
-	uint32_t c = ArgbToRgba(theColor.ToInt());
+	uint32_t c = theColor.ToGLColor();
 	GLVertex v[3] = {
 		{ fx1, fy1, 0, c, 0, 0 },
 		{ fx2, fy2, 0, c, 0, 0 },
@@ -1382,7 +1382,7 @@ void GLInterface::FillRect(const Rect& theRect, const Color& theColor, int theDr
 
 	float x = theRect.mX - 0.5f, y = theRect.mY - 0.5f;
 	float w = theRect.mWidth,     h = theRect.mHeight;
-	uint32_t c = ArgbToRgba(theColor.ToInt());
+	uint32_t c = theColor.ToGLColor();
 
 	GLVertex v[4] = {
 		{ x,     y,     0, c, 0, 0 },
@@ -1414,7 +1414,7 @@ void GLInterface::DrawTriangle(const TriVertex &p1, const TriVertex &p2, const T
 	if (!PreDraw()) return;
 	SetDrawMode(theDrawMode);
 
-	uint32_t c = ArgbToRgba(theColor.ToInt());
+	uint32_t c = theColor.ToGLColor();
 	glUniform1i(gUfUseTexture, 0);
 
 	GLVertex v[3] = {
@@ -1445,7 +1445,7 @@ void GLInterface::DrawTrianglesTex(const TriVertex theVertices[][3], int theNumT
 	SetDrawMode(theDrawMode);
 	SetLinearFilter(blend);
 
-	uint32_t c = ArgbToRgba(theColor.ToInt());
+	uint32_t c = theColor.ToGLColor();
 	((TextureData*)mem->mRenderData)->BltTriangles(theVertices, theNumTriangles, c, tx, ty);
 }
 
@@ -1475,7 +1475,7 @@ void GLInterface::FillPoly(const Point theVertices[], int theNumVertices,
 	if (!PreDraw()) return;
 	SetDrawMode(theDrawMode);
 
-	uint32_t c = ArgbToRgba(theColor.ToInt());
+	uint32_t c = theColor.ToGLColor();
 	glUniform1i(gUfUseTexture, 0);
 
 	VertexList vl;
