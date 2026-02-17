@@ -647,8 +647,8 @@ GLuint& TextureData::GetTexture(int x, int y, int &width, int &height,
 	width  = right - left;
 	height = bottom - top;
 
-	u1 = (float)left  / p.mWidth;  v1 = (float)top    / p.mHeight;
-	u2 = (float)right / p.mWidth;  v2 = (float)bottom / p.mHeight;
+	u1 = (left  + 0.5f) / p.mWidth;  v1 = (top    + 0.5f) / p.mHeight;
+	u2 = (right - 0.5f) / p.mWidth;  v2 = (bottom - 0.5f) / p.mHeight;
 	return p.mTexture;
 }
 
@@ -665,8 +665,8 @@ GLuint& TextureData::GetTextureF(float x, float y, float &width, float &height,
 	width  = right - left;
 	height = bottom - top;
 
-	u1 = left   / p.mWidth;  v1 = top    / p.mHeight;
-	u2 = right  / p.mWidth;  v2 = bottom / p.mHeight;
+	u1 = (left  + 0.5f) / p.mWidth;  v1 = (top    + 0.5f) / p.mHeight;
+	u2 = (right - 0.5f) / p.mWidth;  v2 = (bottom - 0.5f) / p.mHeight;
 	return p.mTexture;
 }
 
