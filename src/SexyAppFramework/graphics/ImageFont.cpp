@@ -1742,6 +1742,10 @@ void ImageFont::DrawStringEx(Graphics* g, int theX, int theY, const std::string&
 
 	Color anOrigColor = g->GetColor();
 
+	// Use NEAREST filtering for bitmap font rendering
+	bool anOldLinearBlend = g->GetLinearBlend();
+	g->SetLinearBlend(false);
+
 	for (aPoolIdx = 0; aPoolIdx < 256; aPoolIdx++)
 	{
 		RenderCommand* aRenderCommand = gRenderHead[aPoolIdx];
@@ -1760,6 +1764,7 @@ void ImageFont::DrawStringEx(Graphics* g, int theX, int theY, const std::string&
 		}
 	}
 
+	g->SetLinearBlend(anOldLinearBlend);
 	g->SetColor(anOrigColor);
 
 	g->SetColorizeImages(colorizeImages);
