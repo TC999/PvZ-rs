@@ -83,6 +83,8 @@ static void GfxEnd()
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(2, 2, GL_FLOAT,         GL_FALSE, sizeof(GLVertex), (const void*)(sizeof(float)*3 + sizeof(uint32_t)));
 	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(3, 4, GL_FLOAT,         GL_FALSE, sizeof(GLVertex), (const void*)(sizeof(float)*3 + sizeof(uint32_t) + sizeof(float)*2));
+	glEnableVertexAttribArray(3);
 
 	glDrawArrays(gVertexMode, 0, gNumVertices);
 
@@ -144,6 +146,10 @@ static void GfxAddVertices(const TriVertex arr[][3], int arrCount, unsigned int 
 			gVertices[gNumVertices + i].color = GetColorFromTriVertex(v[i], theColor);
 			gVertices[gNumVertices + i].tu    = v[i].u * aMaxTotalU;
 			gVertices[gNumVertices + i].tv    = v[i].v * aMaxTotalV;
+			gVertices[gNumVertices + i].uvBounds[0] = 0;
+			gVertices[gNumVertices + i].uvBounds[1] = 0;
+			gVertices[gNumVertices + i].uvBounds[2] = aMaxTotalU;
+			gVertices[gNumVertices + i].uvBounds[3] = aMaxTotalV;
 		}
 		gNumVertices += 3;
 	}
@@ -153,15 +159,18 @@ static void GfxAddVertices(const TriVertex arr[][3], int arrCount, unsigned int 
 static constexpr const char *SHADER_CODE = R"DELIMITER(
 V2F vec4 v_color;
 V2F vec2 v_uv;
+V2F vec4 v_uvBounds;
 
 #ifdef VERTEX
 	uniform mat4 u_viewProj;
 	VERT_IN vec3 a_position;
 	VERT_IN vec4 a_color;
 	VERT_IN vec2 a_uv;
+	VERT_IN vec4 a_uvBounds;
 	void main() {
 		v_color = a_color;
 		v_uv = a_uv;
+		v_uvBounds = a_uvBounds;
 		gl_Position = u_viewProj * vec4(a_position, 1.0);
 	}
 #endif
@@ -170,7 +179,7 @@ V2F vec2 v_uv;
 	uniform int u_useTexture;
 	void main() {
 		if (u_useTexture == 1)
-			FRAG_OUT = TEX2D(u_texture, v_uv) * v_color;
+			FRAG_OUT = TEX2D(u_texture, clamp(v_uv, v_uvBounds.xy, v_uvBounds.zw)) * v_color;
 		else
 			FRAG_OUT = v_color;
 	}
@@ -219,8 +228,8 @@ static GLuint shaderLoad(const char *src)
 	glAttachShader(prog, vert);
 	glAttachShader(prog, frag);
 
-	const char *attribs[] = { "a_position", "a_color", "a_uv" };
-	for (int i = 0; i < 3; i++)
+	const char *attribs[] = { "a_position", "a_color", "a_uv", "a_uvBounds" };
+	for (int i = 0; i < 4; i++)
 		glBindAttribLocation(prog, i, attribs[i]);
 
 	glLinkProgram(prog);
@@ -636,7 +645,8 @@ void TextureData::CheckCreateTextures(MemoryImage *theImage)
 }
 
 GLuint& TextureData::GetTexture(int x, int y, int &width, int &height,
-                                float &u1, float &v1, float &u2, float &v2)
+                                float &u1, float &v1, float &u2, float &v2,
+                                float *uvBounds)
 {
 	int tx = x / mTexPieceWidth, ty = y / mTexPieceHeight;
 	TextureDataPiece &p = mTextures[ty * mTexVecWidth + tx];
@@ -649,11 +659,18 @@ GLuint& TextureData::GetTexture(int x, int y, int &width, int &height,
 
 	u1 = (float)left  / p.mWidth;  v1 = (float)top    / p.mHeight;
 	u2 = (float)right / p.mWidth;  v2 = (float)bottom / p.mHeight;
+
+	// Half-texel inset for shader UV clamping; midpoint fallback guarantees min <= max.
+	float halfU = 0.5f / p.mWidth, halfV = 0.5f / p.mHeight;
+	float midU = (u1 + u2) * 0.5f, midV = (v1 + v2) * 0.5f;
+	uvBounds[0] = std::min(u1 + halfU, midU);  uvBounds[1] = std::min(v1 + halfV, midV);
+	uvBounds[2] = std::max(u2 - halfU, midU);  uvBounds[3] = std::max(v2 - halfV, midV);
 	return p.mTexture;
 }
 
 GLuint& TextureData::GetTextureF(float x, float y, float &width, float &height,
-                                 float &u1, float &v1, float &u2, float &v2)
+                                 float &u1, float &v1, float &u2, float &v2,
+                                 float *uvBounds)
 {
 	int tx = (int)(x / mTexPieceWidth), ty = (int)(y / mTexPieceHeight);
 	TextureDataPiece &p = mTextures[ty * mTexVecWidth + tx];
@@ -667,6 +684,11 @@ GLuint& TextureData::GetTextureF(float x, float y, float &width, float &height,
 
 	u1 = left   / p.mWidth;  v1 = top    / p.mHeight;
 	u2 = right  / p.mWidth;  v2 = bottom / p.mHeight;
+
+	float halfU = 0.5f / p.mWidth, halfV = 0.5f / p.mHeight;
+	float midU = (u1 + u2) * 0.5f, midV = (v1 + v2) * 0.5f;
+	uvBounds[0] = std::min(u1 + halfU, midU);  uvBounds[1] = std::min(v1 + halfV, midV);
+	uvBounds[2] = std::max(u2 - halfU, midU);  uvBounds[3] = std::max(v2 - halfV, midV);
 	return p.mTexture;
 }
 
@@ -699,6 +721,7 @@ void TextureData::Blt(float theX, float theY, const Rect& theSrcRect, const Colo
 	float dstX, dstY;
 	int w, h;
 	float u1, v1, u2, v2;
+	float uvb[4];
 
 	srcY = srcTop; dstY = theY;
 	while (srcY < srcBottom)
@@ -707,14 +730,14 @@ void TextureData::Blt(float theX, float theY, const Rect& theSrcRect, const Colo
 		while (srcX < srcRight)
 		{
 			w = srcRight - srcX; h = srcBottom - srcY;
-			GLuint &tex = GetTexture(srcX, srcY, w, h, u1, v1, u2, v2);
+			GLuint &tex = GetTexture(srcX, srcY, w, h, u1, v1, u2, v2, uvb);
 			float x = dstX, y = dstY;
 
 			GLVertex v[4] = {
-				{ x,     y,     0, aColor, u1, v1 },
-				{ x,     y + h, 0, aColor, u1, v2 },
-				{ x + w, y,     0, aColor, u2, v1 },
-				{ x + w, y + h, 0, aColor, u2, v2 },
+				{ x,     y,     0, aColor, u1, v1, {uvb[0], uvb[1], uvb[2], uvb[3]} },
+				{ x,     y + h, 0, aColor, u1, v2, {uvb[0], uvb[1], uvb[2], uvb[3]} },
+				{ x + w, y,     0, aColor, u2, v1, {uvb[0], uvb[1], uvb[2], uvb[3]} },
+				{ x + w, y + h, 0, aColor, u2, v2, {uvb[0], uvb[1], uvb[2], uvb[3]} },
 			};
 			GfxBindTexture(tex);
 			GfxBegin(GL_TRIANGLE_STRIP);
@@ -736,6 +759,7 @@ static inline float GetCoord(const GLVertex& v, int n)
 	}
 }
 
+// uvBounds not interpolated: all vertices in a draw call share the same bounds.
 static inline GLVertex Interpolate(const GLVertex &a, const GLVertex &b, float t)
 {
 	GLVertex r = a;
@@ -847,6 +871,7 @@ void TextureData::BltTransformed(const SexyMatrix3 &theTrans, const Rect& theSrc
 	float dstX, dstY;
 	int w, h;
 	float u1, v1, u2, v2;
+	float uvb[4];
 
 	srcY = srcTop; dstY = starty;
 	while (srcY < srcBottom)
@@ -855,7 +880,7 @@ void TextureData::BltTransformed(const SexyMatrix3 &theTrans, const Rect& theSrc
 		while (srcX < srcRight)
 		{
 			w = srcRight - srcX; h = srcBottom - srcY;
-			GLuint &tex = GetTexture(srcX, srcY, w, h, u1, v1, u2, v2);
+			GLuint &tex = GetTexture(srcX, srcY, w, h, u1, v1, u2, v2, uvb);
 
 			float x = dstX, y = dstY;
 			SexyVector2 p[4] = { {x, y}, {x, y+h}, {x+w, y}, {x+w, y+h} };
@@ -878,10 +903,10 @@ void TextureData::BltTransformed(const SexyMatrix3 &theTrans, const Rect& theSrc
 			}
 
 			GLVertex vtx[4] = {
-				{ tp[0].x, tp[0].y, 0, aColor, u1, v1 },
-				{ tp[1].x, tp[1].y, 0, aColor, u1, v2 },
-				{ tp[2].x, tp[2].y, 0, aColor, u2, v1 },
-				{ tp[3].x, tp[3].y, 0, aColor, u2, v2 },
+				{ tp[0].x, tp[0].y, 0, aColor, u1, v1, {uvb[0], uvb[1], uvb[2], uvb[3]} },
+				{ tp[1].x, tp[1].y, 0, aColor, u1, v2, {uvb[0], uvb[1], uvb[2], uvb[3]} },
+				{ tp[2].x, tp[2].y, 0, aColor, u2, v1, {uvb[0], uvb[1], uvb[2], uvb[3]} },
+				{ tp[3].x, tp[3].y, 0, aColor, u2, v2, {uvb[0], uvb[1], uvb[2], uvb[3]} },
 			};
 			GfxBindTexture(tex);
 
@@ -926,9 +951,9 @@ void TextureData::BltTriangles(const TriVertex theVertices[][3], int theNumTrian
 	{
 		TriVertex* tv = (TriVertex*)theVertices[tri];
 		GLVertex vtx[3] = {
-			{ tv[0].x+tx, tv[0].y+ty, 0, GetColorFromTriVertex(tv[0], theColor), tv[0].u*mMaxTotalU, tv[0].v*mMaxTotalV },
-			{ tv[1].x+tx, tv[1].y+ty, 0, GetColorFromTriVertex(tv[1], theColor), tv[1].u*mMaxTotalU, tv[1].v*mMaxTotalV },
-			{ tv[2].x+tx, tv[2].y+ty, 0, GetColorFromTriVertex(tv[2], theColor), tv[2].u*mMaxTotalU, tv[2].v*mMaxTotalV },
+			{ tv[0].x+tx, tv[0].y+ty, 0, GetColorFromTriVertex(tv[0], theColor), tv[0].u*mMaxTotalU, tv[0].v*mMaxTotalV, {0, 0, 1, 1} },
+			{ tv[1].x+tx, tv[1].y+ty, 0, GetColorFromTriVertex(tv[1], theColor), tv[1].u*mMaxTotalU, tv[1].v*mMaxTotalV, {0, 0, 1, 1} },
+			{ tv[2].x+tx, tv[2].y+ty, 0, GetColorFromTriVertex(tv[2], theColor), tv[2].u*mMaxTotalU, tv[2].v*mMaxTotalV, {0, 0, 1, 1} },
 		};
 
 		float minU = mMaxTotalU, minV = mMaxTotalV, maxU = 0, maxV = 0;
