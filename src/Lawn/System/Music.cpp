@@ -135,8 +135,6 @@ void Music::MusicInit()
 
 	LoadSong(MusicFile::MUSIC_FILE_DRUMS, "sounds/mainmusic.mo3");
 	mApp->mCompletedLoadingThreadTasks += 3500;
-	LoadSong(MusicFile::MUSIC_FILE_HIHATS, "sounds/mainmusic_hihats.mo3");
-	mApp->mCompletedLoadingThreadTasks += 3500;
 
 	LoadSong(MusicFile::MUSIC_FILE_CREDITS_ZOMBIES_ON_YOUR_LAWN, "sounds/ZombiesOnYourLawn.ogg");
 	mApp->mCompletedLoadingThreadTasks += 3500;
@@ -230,7 +228,6 @@ void Music::PlayMusic(MusicTune theMusicTune, int theOffset, int theDrumsOffset)
 	{
 	case MusicTune::MUSIC_TUNE_DAY_GRASSWALK:
 		mCurMusicFileMain = MusicFile::MUSIC_FILE_MAIN_MUSIC;
-		mCurMusicFileDrums = MusicFile::MUSIC_FILE_DRUMS;
 		if (theOffset == -1)
 			theOffset = 0;
 		PlayFromOffset(mCurMusicFileMain, theOffset, 1.0);
@@ -250,7 +247,6 @@ void Music::PlayMusic(MusicTune theMusicTune, int theOffset, int theDrumsOffset)
 
 	case MusicTune::MUSIC_TUNE_POOL_WATERYGRAVES:
 		mCurMusicFileMain = MusicFile::MUSIC_FILE_MAIN_MUSIC;
-		mCurMusicFileDrums = MusicFile::MUSIC_FILE_DRUMS;
 		if (theOffset == -1)
 			theOffset = 0x5E;
 		PlayFromOffset(mCurMusicFileMain, theOffset, 1.0);
@@ -258,7 +254,6 @@ void Music::PlayMusic(MusicTune theMusicTune, int theOffset, int theDrumsOffset)
 
 	case MusicTune::MUSIC_TUNE_FOG_RIGORMORMIST:
 		mCurMusicFileMain = MusicFile::MUSIC_FILE_MAIN_MUSIC;
-		mCurMusicFileDrums = MusicFile::MUSIC_FILE_DRUMS;
 		if (theOffset == -1)
 			theOffset = 0x7D;
 		PlayFromOffset(mCurMusicFileMain, theOffset, 1.0);
@@ -266,7 +261,6 @@ void Music::PlayMusic(MusicTune theMusicTune, int theOffset, int theDrumsOffset)
 
 	case MusicTune::MUSIC_TUNE_ROOF_GRAZETHEROOF:
 		mCurMusicFileMain = MusicFile::MUSIC_FILE_MAIN_MUSIC;
-		mCurMusicFileDrums = MusicFile::MUSIC_FILE_DRUMS;
 		if (theOffset == -1)
 			theOffset = 0xB8;
 		PlayFromOffset(mCurMusicFileMain, theOffset, 1.0);
@@ -423,7 +417,6 @@ void Music::UpdateMusicBurst()
 	if (mDrumsStateCounter > 0)
 		mDrumsStateCounter--;
 
-	float aFadeTrackVolume = 0.0f;
 	float aDrumsVolume = 0.0f;
 	float aMainTrackVolume = 1.0f;
 	switch (mMusicBurstState)
@@ -435,7 +428,6 @@ void Music::UpdateMusicBurst()
 		case MusicBurstState::MUSIC_BURST_STARTING:
 			if (aBurstScheme == 1)
 			{
-				aFadeTrackVolume = TodAnimateCurveFloat(400, 0, mBurstStateCounter, 0.0f, 1.0f, TodCurves::CURVE_LINEAR);
 				if (mBurstStateCounter == 200)
 				{
 					mMusicDrumsState = MusicDrumsState::MUSIC_DRUMS_ON_QUEUED;
@@ -469,7 +461,6 @@ void Music::UpdateMusicBurst()
 			}
 			break;
 		case MusicBurstState::MUSIC_BURST_ON:
-			aFadeTrackVolume = 1.0f;
 			if (aBurstScheme == 2)
 				aMainTrackVolume = 0.0f;
 			if (mBurstStateCounter == 0 && ((mApp->mBoard->CountZombiesOnScreen() < 4 && mBurstOverride == -1) || mBurstOverride == 2))
@@ -491,9 +482,7 @@ void Music::UpdateMusicBurst()
 			}
 			break;
 		case MusicBurstState::MUSIC_BURST_FINISHING:
-			if (aBurstScheme == 1)
-				aFadeTrackVolume = TodAnimateCurveFloat(800, 0, mBurstStateCounter, 1.0f, 0.0f, TodCurves::CURVE_LINEAR);
-			else
+			if (aBurstScheme == 2)
 				aMainTrackVolume = TodAnimateCurveFloat(400, 0, mBurstStateCounter, 0.0f, 1.0f, TodCurves::CURVE_LINEAR);
 			if (mBurstStateCounter == 0 && mMusicDrumsState == MusicDrumsState::MUSIC_DRUMS_OFF)
 				mMusicBurstState = MusicBurstState::MUSIC_BURST_OFF;
@@ -677,5 +666,5 @@ void Music::GameMusicPause(bool thePause)
 
 int Music::GetNumLoadingTasks()
 {
-	return 3500 * 2;
+	return 3500;
 }
