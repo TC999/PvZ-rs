@@ -2,6 +2,15 @@ cmake_minimum_required(VERSION 3.5...4.0)
 
 project(pvz-portable LANGUAGES C CXX ASM)
 
+option(BUILD_STATIC "Link statically" OFF)
+if(BUILD_STATIC)
+	if(WIN32 AND NOT MSVC)
+		set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
+		set(BUILD_SHARED_LIBS OFF)
+		link_libraries("-static")
+	endif()
+endif()
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 if (CMAKE_GENERATOR MATCHES "Ninja")
 	set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
@@ -111,6 +120,29 @@ find_package(JPEG REQUIRED)
 find_package(PNG REQUIRED)
 find_package(SDL2 REQUIRED)
 
+if(BUILD_STATIC AND TARGET SDL2::SDL2-static)
+    set(SDL2_TARGET SDL2::SDL2-static)
+	# Check if SDL2::SDL2main is a target that depends on shared SDL2
+	get_target_property(SDL2MAIN_TYPE SDL2::SDL2main TYPE)
+    if(SDL2MAIN_TYPE STREQUAL "STATIC_LIBRARY")
+         # If it's pure static, we might still have interface properties issue.
+         # So let's try to link file directly if possible or define own target.
+         # For safety, let's just find the library file.
+         find_library(SDL2MAIN_LIB_STATIC NAMES SDL2main libSDL2main PATH_SUFFIXES lib)
+         if(SDL2MAIN_LIB_STATIC)
+             set(SDL2_MAIN_TARGET ${SDL2MAIN_LIB_STATIC})
+         else()
+             set(SDL2_MAIN_TARGET SDL2::SDL2main)
+         endif()
+    else()
+         set(SDL2_MAIN_TARGET SDL2::SDL2main)
+    endif()
+else()
+    set(SDL2_TARGET SDL2::SDL2)
+    set(SDL2_MAIN_TARGET SDL2::SDL2main)
+endif()
+
+
 set(SDL_MIXER_X_STATIC ON CACHE BOOL "Build static library of SDL Mixer X")
 set(SDL_MIXER_X_SHARED OFF CACHE BOOL "Build shared library of SDL Mixer X")
 set(USE_MIDI OFF CACHE BOOL "SDL Mixer X midi")
@@ -150,8 +182,8 @@ target_link_libraries(pvz-portable PRIVATE
 	PNG::PNG
 	JPEG::JPEG
 	ZLIB::ZLIB
-	SDL2::SDL2main
-	SDL2::SDL2
+	${SDL2_MAIN_TARGET}
+	${SDL2_TARGET}
 )
 
 if (WIN32)
