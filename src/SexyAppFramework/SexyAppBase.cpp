@@ -1270,6 +1270,36 @@ bool SexyAppBase::ReadBufferFromFile(const std::string& theFileName, Buffer* the
 	}
 }
 
+bool SexyAppBase::ReadU8StringFromFile(const std::string& theFileName, std::string* theString)
+{
+	Buffer aBuffer;
+	if (!ReadBufferFromFile(theFileName, &aBuffer))
+		return false;
+
+	aBuffer.SeekFront();
+
+	char* aBufferPtr = (char*)aBuffer.GetDataPtr();
+	size_t aBufferSize = aBuffer.GetDataLen();
+	char* aStringBuffer = nullptr;
+	bool isUTF8WithBOM = false;
+	if (aBufferSize >= 3 && SDL_memcmp(aBufferPtr, "\xEF\xBB\xBF", 3) == 0) { /* UTF-8 with BOM */
+		*theString = std::string(aBufferPtr + 3, aBufferSize - 3);
+		isUTF8WithBOM = true;
+	} else if (aBufferSize >= 2 && SDL_memcmp(aBufferPtr, "\xFF\xFE", 2) == 0) { /* UTF-16 LE with BOM */
+		aStringBuffer = SDL_iconv_string("UTF-8", "UTF-16LE", aBufferPtr + 2, aBufferSize - 2);
+	} else if (aBufferSize >= 2 && SDL_memcmp(aBufferPtr, "\xFE\xFF", 2) == 0) { /* UTF-16 BE with BOM */
+		aStringBuffer = SDL_iconv_string("UTF-8", "UTF-16BE", aBufferPtr + 2, aBufferSize - 2);
+	} else {
+		// FIXME: use ANSI encoding
+		aStringBuffer = SDL_iconv_string("UTF-8", "ISO-8859-1", aBufferPtr, aBufferSize);
+	}
+	if (aStringBuffer) {
+		*theString = std::string(aStringBuffer);
+		SDL_free(aStringBuffer);
+	}
+	return isUTF8WithBOM || aStringBuffer != nullptr;
+}
+
 bool SexyAppBase::FileExists(const std::string& theFileName)
 {
 	if (mPlayingDemoBuffer)
