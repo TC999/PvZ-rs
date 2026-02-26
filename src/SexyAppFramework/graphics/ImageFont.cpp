@@ -4,6 +4,7 @@
 #include "SexyAppBase.h"
 #include "MemoryImage.h"
 #include "graphics/GLImage.h"
+#include <SDL_stdinc.h>
 #include <algorithm>
 #include <mutex>
 #include "fcaseopen/fcaseopen.h"
@@ -131,7 +132,7 @@ FontLayer::FontLayer(const FontLayer& theFontLayer) :
 	}
 }
 
-CharData* FontLayer::GetCharData(char theChar)
+CharData* FontLayer::GetCharData(char32_t theChar)
 {
 	auto anItr = mCharDataMap.find(theChar);
 	if (anItr == mCharDataMap.end())
@@ -240,13 +241,6 @@ bool FontData::GetColorFromDataElement(DataElement* theElement, Color& theColor)
 	return true;
 }
 
-static char32_t UTF8CharToUTF32Char(const std::string &theString)
-{
-	char32_t ret = 0;
-	memcpy(&ret, theString.data(), theString.length());
-	return ret;
-}
-
 static bool UTF8DecodeNext(const std::string& theString, size_t& offset, char32_t& outChar)
 {
 	if (offset >= theString.size())
@@ -296,6 +290,16 @@ static bool UTF8DecodeNext(const std::string& theString, size_t& offset, char32_
 	outChar = value;
 	offset += length;
 	return true;
+}
+
+static char32_t UTF8CharToUTF32Char(const std::string &theString)
+{
+	char32_t outChar;
+	size_t offset = 0;
+	if (UTF8DecodeNext(theString, offset, outChar) && offset == theString.size())
+		return outChar;
+
+	return 0; // Invalid character
 }
 
 static bool UTF8PairToUTF32Pair(const std::string& theString, char32_t& firstChar, char32_t& secondChar)
@@ -1416,10 +1420,11 @@ void ImageFont::GenerateActiveFontLayers()
 int ImageFont::StringWidth(const std::string& theString)
 {
 	int aWidth = 0;
-	char aPrevChar = 0;
-	for (int i = 0; i < (int)theString.length(); i++)
+	char32_t aPrevChar = 0;
+	size_t offset = 0;
+	char32_t aChar = 0;
+	while (UTF8DecodeNext(theString, offset, aChar))
 	{
-		char aChar = theString[i];
 		aWidth += CharWidthKern(aChar, aPrevChar);
 		aPrevChar = aChar;
 	}
@@ -1427,7 +1432,7 @@ int ImageFont::StringWidth(const std::string& theString)
 	return aWidth;
 }
 
-int ImageFont::CharWidthKern(char theChar, char thePrevChar)
+int ImageFont::CharWidthKern(char32_t theChar, char32_t thePrevChar)
 {
 	Prepare();
 
@@ -1486,7 +1491,7 @@ int ImageFont::CharWidthKern(char theChar, char thePrevChar)
 	return aMaxXPos;
 }
 
-int ImageFont::CharWidth(char theChar)
+int ImageFont::CharWidth(char32_t theChar)
 {
 	return CharWidthKern(theChar, 0);
 }
@@ -1529,13 +1534,23 @@ void ImageFont::DrawStringEx(Graphics* g, int theX, int theY, const std::string&
 	int aCurXPos = theX;
 	int aCurPoolIdx = 0;
 
-	for (uint32_t aCharNum = 0; aCharNum < theString.length(); aCharNum++)
+	std::vector<char32_t> aChars;
 	{
-		char aChar = GetMappedChar(theString[aCharNum]);//mFontData->mCharMap[(uchar) theString[aCharNum]];
+		size_t offset = 0;
+		char32_t aChar = 0;
+		while (UTF8DecodeNext(theString, offset, aChar))
+		{
+			aChars.push_back(aChar);
+		}
+	}
 
-		char aNextChar = 0;
-		if (aCharNum < theString.length() - 1)
-			aNextChar = GetMappedChar(theString[aCharNum + 1]);//mFontData->mCharMap[(uchar) theString[aCharNum+1]];
+	for (uint32_t aCharNum = 0; aCharNum < aChars.size(); aCharNum++)
+	{
+		char32_t aChar = GetMappedChar(aChars[aCharNum]);//mFontData->mCharMap[(uchar) theString[aCharNum]];
+
+		char32_t aNextChar = 0;
+		if (aCharNum < aChars.size() - 1)
+			aNextChar = GetMappedChar(aChars[aCharNum + 1]);//mFontData->mCharMap[(uchar) theString[aCharNum+1]];
 
 		int aMaxXPos = aCurXPos;
 
@@ -1756,7 +1771,7 @@ void ImageFont::Prepare()
 	}
 }
 
-char ImageFont::GetMappedChar(char theChar)
+char32_t ImageFont::GetMappedChar(char32_t theChar)
 {
 	auto anItr = mFontData->mCharMap.find(theChar);
 	if (anItr != mFontData->mCharMap.end())
