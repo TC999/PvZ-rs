@@ -1270,6 +1270,21 @@ bool SexyAppBase::ReadBufferFromFile(const std::string& theFileName, Buffer* the
 	}
 }
 
+bool SexyAppBase::ReadUTF8StringFromFile(const std::string& theFileName, std::string* theString)
+{
+	Buffer aBuffer;
+	if (!ReadBufferFromFile(theFileName, &aBuffer))
+		return false;
+
+	std::string aString;
+	if (!aBuffer.ToUTF8String(&aString)) {
+		return false;
+	}
+
+	*theString = aString;
+	return true;
+}
+
 bool SexyAppBase::FileExists(const std::string& theFileName)
 {
 	if (mPlayingDemoBuffer)
