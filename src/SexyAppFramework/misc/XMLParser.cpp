@@ -104,7 +104,7 @@ bool XMLParser::GetAsciiChar(char* theChar, bool* error)
 
 bool XMLParser::GetUTF8Char(char* theChar, bool* error)
 {
-	*error = true;
+	(void)error;
 	unsigned char aChar = 0;
 	if (p_fread(&aChar, 1, 1, mFile) != 1) return false;
 
@@ -126,7 +126,6 @@ bool XMLParser::GetUTF8Char(char* theChar, bool* error)
 	}
 
 	*theChar = (char)aChar;
-	*error = false;
 	return true;
 }
 
