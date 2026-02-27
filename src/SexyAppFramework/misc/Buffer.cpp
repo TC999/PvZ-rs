@@ -1,4 +1,5 @@
 #include "Buffer.h"
+#include <SDL_stdinc.h>
 #define POLYNOMIAL 0x04c11db7L
 
 static bool 	     bCrcTableGenerated = false;
@@ -98,11 +99,30 @@ std::string Buffer::ToWebString() const
 	return aString;
 }
 
-std::string Buffer::UTF8ToString() const
+// consider BOM
+bool Buffer::ToUTF8String(std::string* theString) const
 {
 	const char* aData = (const char*)GetDataPtr();
 	int aLen = GetDataLen();
-	return std::string(aData, aData + aLen);
+
+	char* aStringBuffer = nullptr;
+	bool isUTF8WithBOM = false;
+	if (aLen >= 3 && SDL_memcmp(aData, "\xEF\xBB\xBF", 3) == 0) { /* UTF-8 with BOM */
+		*theString = std::string(aData + 3, aLen - 3);
+		isUTF8WithBOM = true;
+	} else if (aLen >= 2 && SDL_memcmp(aData, "\xFF\xFE", 2) == 0) { /* UTF-16 LE with BOM */
+		aStringBuffer = SDL_iconv_string("UTF-8", "UTF-16LE", aData + 2, aLen - 2);
+	} else if (aLen >= 2 && SDL_memcmp(aData, "\xFE\xFF", 2) == 0) { /* UTF-16 BE with BOM */
+		aStringBuffer = SDL_iconv_string("UTF-8", "UTF-16BE", aData + 2, aLen - 2);
+	} else {
+		// TODO: use ANSI encoding. For now, only English version use Windows-1252 without BOM
+		aStringBuffer = SDL_iconv_string("UTF-8", "CP1252", aData, aLen);
+	}
+	if (aStringBuffer) {
+		*theString = std::string(aStringBuffer);
+		SDL_free(aStringBuffer);
+	}
+	return isUTF8WithBOM || aStringBuffer != nullptr;
 }
 
 void Buffer::FromWebString(const std::string& theString)
