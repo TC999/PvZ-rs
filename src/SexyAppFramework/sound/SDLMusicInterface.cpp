@@ -62,8 +62,6 @@ void SDLMusicInterface::PlayMusic(int theSongId, int theOffset, bool noLoop)
 
 void SDLMusicInterface::StopMusic(int theSongId)
 {
-	Mix_HaltMusic();
-
 	SDLMusicMap::iterator anItr = mMusicMap.find(theSongId);
 	if (anItr != mMusicMap.end())
 	{
@@ -295,4 +293,26 @@ int SDLMusicInterface::GetMusicOrder(int theSongId)
 		return aPosition;
 	}
 	return -1;
+}
+
+bool SDLMusicInterface::SetMusicTempoFactor(int theSongId, double theTempo)
+{
+	SDLMusicMap::iterator anItr = mMusicMap.find(theSongId);
+	if (anItr != mMusicMap.end())
+	{
+		SDLMusicInfo* aMusicInfo = &anItr->second;
+		return Mix_SetMusicTempo(aMusicInfo->mHMusic, theTempo) == 0;
+	}
+	return false;
+}
+
+double SDLMusicInterface::GetMusicTempoFactor(int theSongId)
+{
+	SDLMusicMap::iterator anItr = mMusicMap.find(theSongId);
+	if (anItr != mMusicMap.end())
+	{
+		SDLMusicInfo* aMusicInfo = &anItr->second;
+		return Mix_GetMusicTempo(aMusicInfo->mHMusic);
+	}
+	return -1.0;
 }

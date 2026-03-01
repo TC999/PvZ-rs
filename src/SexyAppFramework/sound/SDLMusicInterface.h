@@ -64,6 +64,8 @@ public:
 
 	// functions for dealing with MODs
 	int						GetMusicOrder(int theSongId);
+	bool					SetMusicTempoFactor(int theSongId, double theTempo);
+	double					GetMusicTempoFactor(int theSongId);
 };
 }
 

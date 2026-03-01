@@ -380,11 +380,14 @@ void Music::PlayMusic(MusicTune theMusicTune, int theOffset, int theDrumsOffset)
 
 	if (aRestartingSong)
 	{
-		// TODO: Restore BPM/speed for restarting songs when tempo API is implemented
-	}
-	else
-	{
-		// TODO: Read base BPM/speed from newly started song when tempo API is implemented
+		// Reset tempo factors to 1.0 (normal speed) on all active tracks
+		SDLMusicInterface* anSDL = (SDLMusicInterface*)mApp->mMusicInterface;
+		if (mCurMusicFileMain != MusicFile::MUSIC_FILE_NONE)
+			anSDL->SetMusicTempoFactor((int)mCurMusicFileMain, 1.0);
+		if (mCurMusicFileDrums != MusicFile::MUSIC_FILE_NONE)
+			anSDL->SetMusicTempoFactor((int)mCurMusicFileDrums, 1.0);
+		if (mCurMusicFileHihats != MusicFile::MUSIC_FILE_NONE)
+			anSDL->SetMusicTempoFactor((int)mCurMusicFileHihats, 1.0);
 	}
 }
 
@@ -400,20 +403,23 @@ void Music::MusicResyncChannel(MusicFile theMusicFileToMatch, MusicFile theMusic
 	unsigned int aPosToMatch = GetMusicOrder(theMusicFileToMatch);
 	unsigned int aPosToSync = GetMusicOrder(theMusicFileToSync);
 	int aDiff = (aPosToSync >> 16) - (aPosToMatch >> 16);  // Row diff between two channels
-	if (abs(aDiff) <= 128)
-	{
-		int aBPM = mBaseBPM;
-		if (aDiff > 2)
-			aBPM -= 2;
-		else if (aDiff > 0)
-			aBPM -= 1;
-		else if (aDiff < -2)
-			aBPM += 2;
-		else if (aDiff < 0)
-			aBPM -= 1;
+	if (abs(aDiff) > 128)
+		return;
 
-		// TODO: Apply BPM adjustment when tempo API is implemented
-	}
+	int aBPM = mBaseBPM;
+	if (aDiff > 2)
+		aBPM -= 2;
+	else if (aDiff > 0)
+		aBPM -= 1;
+	else if (aDiff < -2)
+		aBPM += 2;
+	else if (aDiff < 0)
+		aBPM += 1;
+
+	// Apply tempo adjustment as a factor relative to base BPM
+	SDLMusicInterface* anSDL = (SDLMusicInterface*)mApp->mMusicInterface;
+	double aTempoFactor = (double)aBPM / (double)mBaseBPM;
+	anSDL->SetMusicTempoFactor((int)theMusicFileToSync, aTempoFactor);
 }
 
 void Music::MusicResync()

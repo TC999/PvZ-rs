@@ -233,8 +233,12 @@ static void OPENMPT_SetVolume(void *context, int volume)
 {
     OPENMPT_Music *music = (OPENMPT_Music *)context;
     music->volume = volume;
-	unsigned int mptVol = (unsigned int)volume * 2;
-	openmpt.openmpt_module_set_render_param(music->file, OPENMPT_MODULE_RENDER_MASTERGAIN_MILLIBEL, (int32_t)(2000.0*log10(mptVol/128.0)));
+	if (volume <= 0) {
+		openmpt.openmpt_module_set_render_param(music->file, OPENMPT_MODULE_RENDER_MASTERGAIN_MILLIBEL, INT32_MIN);
+	} else {
+		unsigned int mptVol = (unsigned int)volume * 2;
+		openmpt.openmpt_module_set_render_param(music->file, OPENMPT_MODULE_RENDER_MASTERGAIN_MILLIBEL, (int32_t)(2000.0*log10(mptVol/128.0)));
+	}
 }
 
 /* Get the volume for an openmpt stream */
@@ -389,6 +393,27 @@ static int OPENMPT_SetChannelVolume(void *context, int channel, int volume)
     return 0;
 }
 
+/* Set the tempo factor (1.0 = normal) */
+static int OPENMPT_SetTempo(void *context, double tempo)
+{
+    OPENMPT_Music *music = (OPENMPT_Music *)context;
+    if (music && music->ext_interactive && music->ext_interactive->set_tempo_factor && (tempo > 0.0)) {
+        music->ext_interactive->set_tempo_factor(music->ext, tempo);
+        return 0;
+    }
+    return -1;
+}
+
+/* Get the current tempo factor */
+static double OPENMPT_GetTempo(void *context)
+{
+    OPENMPT_Music *music = (OPENMPT_Music *)context;
+    if (music && music->ext_interactive && music->ext_interactive->get_tempo_factor) {
+        return music->ext_interactive->get_tempo_factor(music->ext);
+    }
+    return -1.0;
+}
+
 /* Jump (seek) to a given position */
 static int OPENMPT_Seek(void *context, double position)
 {
@@ -465,8 +490,8 @@ Mix_MusicInterface Mix_MusicInterface_OPENMPT =
     OPENMPT_Seek,
     OPENMPT_Tell,
     OPENMPT_Duration,
-    NULL,   /* SetTempo [MIXER-X] */
-    NULL,   /* GetTempo [MIXER-X] */
+    OPENMPT_SetTempo,   /* SetTempo [MIXER-X] */
+    OPENMPT_GetTempo,   /* GetTempo [MIXER-X] */
     NULL,   /* SetSpeed [MIXER-X] */
     NULL,   /* GetSpeed [MIXER-X] */
     NULL,   /* SetPitch [MIXER-X] */
