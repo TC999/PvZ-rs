@@ -78,43 +78,42 @@ bool Music::TodLoadMusic(MusicFile theMusicFile, const std::string& theFileName)
 //0x45A6C0
 void Music::SetupMusicFileForTune(MusicFile theMusicFile, MusicTune theMusicTune)
 {
-	int aTrackCount = 0;
+	constexpr const int TRACK_COUNT = 30;
 	int aTrackStart1 = -1, aTrackEnd1 = -1, aTrackStart2 = -1, aTrackEnd2 = -1;
 
 	switch (theMusicTune)
 	{
 	case MusicTune::MUSIC_TUNE_DAY_GRASSWALK:
 		switch (theMusicFile) {
-		case MusicFile::MUSIC_FILE_MAIN_MUSIC:		aTrackCount = 30;	aTrackStart1 = 0;	aTrackEnd1 = 23;											break;
-		case MusicFile::MUSIC_FILE_HIHATS:			aTrackCount = 30;	aTrackStart1 = 27;	aTrackEnd1 = 27;											break;
-		case MusicFile::MUSIC_FILE_DRUMS:			aTrackCount = 30;	aTrackStart1 = 24;	aTrackEnd1 = 26;											break;
+		case MusicFile::MUSIC_FILE_MAIN_MUSIC:		aTrackStart1 = 0;	aTrackEnd1 = 23;											break;
+		case MusicFile::MUSIC_FILE_HIHATS:			aTrackStart1 = 27;	aTrackEnd1 = 27;											break;
+		case MusicFile::MUSIC_FILE_DRUMS:			aTrackStart1 = 24;	aTrackEnd1 = 26;											break;
 		default: break;
 		} break;
 	case MusicTune::MUSIC_TUNE_POOL_WATERYGRAVES:
 		switch (theMusicFile) {
-		case MusicFile::MUSIC_FILE_MAIN_MUSIC:		aTrackCount = 30;	aTrackStart1 = 0;	aTrackEnd1 = 17;											break;
-		case MusicFile::MUSIC_FILE_HIHATS:			aTrackCount = 30;	aTrackStart1 = 18;	aTrackEnd1 = 24;	aTrackStart2 = 29;	aTrackEnd2 = 29;	break;
-		case MusicFile::MUSIC_FILE_DRUMS:			aTrackCount = 30;	aTrackStart1 = 25;	aTrackEnd1 = 28;											break;
+		case MusicFile::MUSIC_FILE_MAIN_MUSIC:		aTrackStart1 = 0;	aTrackEnd1 = 17;											break;
+		case MusicFile::MUSIC_FILE_HIHATS:			aTrackStart1 = 18;	aTrackEnd1 = 24;	aTrackStart2 = 29;	aTrackEnd2 = 29;	break;
+		case MusicFile::MUSIC_FILE_DRUMS:			aTrackStart1 = 25;	aTrackEnd1 = 28;											break;
 		default: break;
 		} break;
 	case MusicTune::MUSIC_TUNE_FOG_RIGORMORMIST:
 		switch (theMusicFile) {
-		case MusicFile::MUSIC_FILE_MAIN_MUSIC:		aTrackCount = 30;	aTrackStart1 = 0;	aTrackEnd1 = 15;											break;
-		case MusicFile::MUSIC_FILE_HIHATS:			aTrackCount = 30;	aTrackStart1 = 23;	aTrackEnd1 = 23;											break;
-		case MusicFile::MUSIC_FILE_DRUMS:			aTrackCount = 30;	aTrackStart1 = 16;	aTrackEnd1 = 22;											break;
+		case MusicFile::MUSIC_FILE_MAIN_MUSIC:		aTrackStart1 = 0;	aTrackEnd1 = 15;											break;
+		case MusicFile::MUSIC_FILE_HIHATS:			aTrackStart1 = 23;	aTrackEnd1 = 23;											break;
+		case MusicFile::MUSIC_FILE_DRUMS:			aTrackStart1 = 16;	aTrackEnd1 = 22;											break;
 		default: break;
 		} break;
 	case MusicTune::MUSIC_TUNE_ROOF_GRAZETHEROOF:
 		switch (theMusicFile) {
-		case MusicFile::MUSIC_FILE_MAIN_MUSIC:		aTrackCount = 30;	aTrackStart1 = 0;	aTrackEnd1 = 17;											break;
-		case MusicFile::MUSIC_FILE_HIHATS:			aTrackCount = 30;	aTrackStart1 = 21;	aTrackEnd1 = 21;											break;
-		case MusicFile::MUSIC_FILE_DRUMS:			aTrackCount = 30;	aTrackStart1 = 18;	aTrackEnd1 = 20;											break;
+		case MusicFile::MUSIC_FILE_MAIN_MUSIC:		aTrackStart1 = 0;	aTrackEnd1 = 17;											break;
+		case MusicFile::MUSIC_FILE_HIHATS:			aTrackStart1 = 21;	aTrackEnd1 = 21;											break;
+		case MusicFile::MUSIC_FILE_DRUMS:			aTrackStart1 = 18;	aTrackEnd1 = 20;											break;
 		default: break;
 		} break;
 	default:
 		if (theMusicFile == MusicFile::MUSIC_FILE_MAIN_MUSIC || theMusicFile == MusicFile::MUSIC_FILE_DRUMS)
 		{
-			aTrackCount = 30;
 			aTrackStart1 = 0;
 			aTrackEnd1 = 29;
 		}
@@ -122,7 +121,7 @@ void Music::SetupMusicFileForTune(MusicFile theMusicFile, MusicTune theMusicTune
 	}
 
 	Mix_Music* aHMusic = GetMusicHandle(theMusicFile);
-	for (int aTrack = 0; aTrack < aTrackCount; aTrack++)
+	for (int aTrack = 0; aTrack < TRACK_COUNT; aTrack++)
 	{
 		float aVolume;
 		if (aTrack >= aTrackStart1 && aTrack <= aTrackEnd1)
