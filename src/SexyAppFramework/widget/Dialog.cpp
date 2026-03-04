@@ -10,10 +10,10 @@
 using namespace Sexy;
 
 
-std::string Sexy::DIALOG_YES_STRING				= "YES";
-std::string Sexy::DIALOG_NO_STRING				= "NO";
-std::string Sexy::DIALOG_OK_STRING				= "OK";
-std::string Sexy::DIALOG_CANCEL_STRING			= "CANCEL";
+std::string Sexy::DIALOG_YES_STRING				= "Yes";
+std::string Sexy::DIALOG_NO_STRING				= "No";
+std::string Sexy::DIALOG_OK_STRING				= "Ok";
+std::string Sexy::DIALOG_CANCEL_STRING			= "Cancel";
 
 static int gDialogColors[][3] = 
 {{255, 255, 255},
