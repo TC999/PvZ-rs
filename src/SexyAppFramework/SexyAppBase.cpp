@@ -116,6 +116,20 @@ SexyAppBase::SexyAppBase()
 	{
 		mResourceDir = "";
 	}
+#elif defined(__IPHONEOS__)
+	// iOS app bundle is read-only; use Documents via SDL_GetPrefPath
+	{
+		char* aPrefPath = SDL_GetPrefPath("io.github.wszqkzqk", "PvZPortable");
+		if (aPrefPath)
+		{
+			mResourceDir = aPrefPath;
+			SDL_free(aPrefPath);
+		}
+		else
+		{
+			mResourceDir = "";
+		}
+	}
 #else
 	char* aBasePath = SDL_GetBasePath();
 	if (aBasePath)
