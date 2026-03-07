@@ -28,8 +28,84 @@
 #include "graphics/GLInterface.h"
 #include "graphics/GLImage.h"
 #include "widget/WidgetManager.h"
+#include "misc/KeyCodes.h"
 
 using namespace Sexy;
+
+// Map SDL_Keycode to internal KeyCode (Windows VK-compatible).
+static KeyCode SDLKeyToKeyCode(SDL_Keycode theSDLKey)
+{
+	if (theSDLKey >= SDLK_a && theSDLKey <= SDLK_z)
+		return static_cast<KeyCode>(theSDLKey - SDLK_a + 'A');
+
+	if (theSDLKey >= SDLK_0 && theSDLKey <= SDLK_9)
+		return static_cast<KeyCode>(theSDLKey);
+
+	switch (theSDLKey)
+	{
+		case SDLK_BACKSPACE:    return KEYCODE_BACK;
+		case SDLK_TAB:          return KEYCODE_TAB;
+		case SDLK_CLEAR:        return KEYCODE_CLEAR;
+		case SDLK_RETURN:       return KEYCODE_RETURN;
+		case SDLK_ESCAPE:       return KEYCODE_ESCAPE;
+		case SDLK_SPACE:        return KEYCODE_SPACE;
+		case SDLK_DELETE:       return KEYCODE_DELETE;
+
+		case SDLK_LEFT:         return KEYCODE_LEFT;
+		case SDLK_UP:           return KEYCODE_UP;
+		case SDLK_RIGHT:        return KEYCODE_RIGHT;
+		case SDLK_DOWN:         return KEYCODE_DOWN;
+
+		case SDLK_INSERT:       return KEYCODE_INSERT;
+		case SDLK_HOME:         return KEYCODE_HOME;
+		case SDLK_END:          return KEYCODE_END;
+		case SDLK_PAGEUP:       return KEYCODE_PRIOR;
+		case SDLK_PAGEDOWN:     return KEYCODE_NEXT;
+
+		case SDLK_LSHIFT:
+		case SDLK_RSHIFT:       return KEYCODE_SHIFT;
+		case SDLK_LCTRL:
+		case SDLK_RCTRL:        return KEYCODE_CONTROL;
+		case SDLK_LALT:
+		case SDLK_RALT:         return KEYCODE_MENU;
+		case SDLK_PAUSE:        return KEYCODE_PAUSE;
+		case SDLK_CAPSLOCK:     return KEYCODE_CAPITAL;
+		case SDLK_NUMLOCKCLEAR: return KEYCODE_NUMLOCK;
+		case SDLK_SCROLLLOCK:   return KEYCODE_SCROLL;
+
+		case SDLK_KP_0:         return KEYCODE_NUMPAD0;
+		case SDLK_KP_1:         return KEYCODE_NUMPAD1;
+		case SDLK_KP_2:         return KEYCODE_NUMPAD2;
+		case SDLK_KP_3:         return KEYCODE_NUMPAD3;
+		case SDLK_KP_4:         return KEYCODE_NUMPAD4;
+		case SDLK_KP_5:         return KEYCODE_NUMPAD5;
+		case SDLK_KP_6:         return KEYCODE_NUMPAD6;
+		case SDLK_KP_7:         return KEYCODE_NUMPAD7;
+		case SDLK_KP_8:         return KEYCODE_NUMPAD8;
+		case SDLK_KP_9:         return KEYCODE_NUMPAD9;
+		case SDLK_KP_MULTIPLY:  return KEYCODE_MULTIPLY;
+		case SDLK_KP_PLUS:      return KEYCODE_ADD;
+		case SDLK_KP_MINUS:     return KEYCODE_SUBTRACT;
+		case SDLK_KP_PERIOD:    return KEYCODE_DECIMAL;
+		case SDLK_KP_DIVIDE:    return KEYCODE_DIVIDE;
+		case SDLK_KP_ENTER:     return KEYCODE_RETURN;
+
+		case SDLK_F1:           return KEYCODE_F1;
+		case SDLK_F2:           return KEYCODE_F2;
+		case SDLK_F3:           return KEYCODE_F3;
+		case SDLK_F4:           return KEYCODE_F4;
+		case SDLK_F5:           return KEYCODE_F5;
+		case SDLK_F6:           return KEYCODE_F6;
+		case SDLK_F7:           return KEYCODE_F7;
+		case SDLK_F8:           return KEYCODE_F8;
+		case SDLK_F9:           return KEYCODE_F9;
+		case SDLK_F10:          return KEYCODE_F10;
+		case SDLK_F11:          return KEYCODE_F11;
+		case SDLK_F12:          return KEYCODE_F12;
+
+		default:                return KEYCODE_UNKNOWN;
+	}
+}
 
 void SexyAppBase::InitInput()
 {
@@ -139,12 +215,12 @@ bool SexyAppBase::ProcessDeferredMessages(bool singleMessage)
 
 			case SDL_KEYDOWN:
 				mLastUserInputTick = mLastTimerTime;
-				mWidgetManager->KeyDown((KeyCode)event.key.keysym.sym);
+				mWidgetManager->KeyDown(SDLKeyToKeyCode(event.key.keysym.sym));
 				break;
 
 			case SDL_KEYUP:
 				mLastUserInputTick = mLastTimerTime;
-				mWidgetManager->KeyUp((KeyCode)event.key.keysym.sym);
+				mWidgetManager->KeyUp(SDLKeyToKeyCode(event.key.keysym.sym));
 				break;
 
 			case SDL_TEXTINPUT:
