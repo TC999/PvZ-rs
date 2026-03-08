@@ -32,6 +32,8 @@
 #include <math.h>
 #include <vector>
 #include <algorithm>
+#include <cstdlib>
+#include <filesystem>
 
 #include <SDL.h>
 
@@ -117,13 +119,12 @@ SexyAppBase::SexyAppBase()
 		mResourceDir = "";
 	}
 #elif defined(__IPHONEOS__)
-	// iOS app bundle is read-only; use Documents via SDL_GetPrefPath
+	// iOS: use Documents directory (visible in Files app via UIFileSharingEnabled)
 	{
-		char* aPrefPath = SDL_GetPrefPath("io.github.wszqkzqk", "PvZPortable");
-		if (aPrefPath)
+		const char* aHome = std::getenv("HOME");
+		if (aHome != nullptr && aHome[0] != '\0')
 		{
-			mResourceDir = aPrefPath;
-			SDL_free(aPrefPath);
+			mResourceDir = (std::filesystem::path(aHome) / "Documents").generic_string() + "/";
 		}
 		else
 		{
@@ -3080,6 +3081,14 @@ void SexyAppBase::Init()
 		if (aExtPath)
 		{
 			SetAppDataFolder(std::string(aExtPath) + "/");
+		}
+	}
+#elif defined(__IPHONEOS__)
+	{
+		const char* aHome = std::getenv("HOME");
+		if (aHome != nullptr && aHome[0] != '\0')
+		{
+			SetAppDataFolder((std::filesystem::path(aHome) / "Documents").generic_string() + "/");
 		}
 	}
 #elif !defined(__SWITCH__) && !defined(__3DS__)

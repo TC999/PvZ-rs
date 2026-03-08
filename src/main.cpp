@@ -22,6 +22,8 @@
 #include "LawnApp.h"
 #include "Resources.h"
 #include "Sexy.TodLib/TodStringFile.h"
+#include <cstdlib>
+#include <filesystem>
 #include <vector>
 using namespace Sexy;
 
@@ -36,6 +38,10 @@ using namespace Sexy;
 extern "C" {
 	unsigned int __stacksize__ = 512 * 1024;
 }
+#endif
+
+#ifdef __IPHONEOS__
+#include <SDL.h>
 #endif
 
 bool (*gAppCloseRequest)();				//[0x69E6A0]
@@ -94,6 +100,32 @@ int main(int argc, char** argv)
 
 #ifdef _WIN32
 	BuildUtf8ArgsFromWin32(argc, argv);
+#endif
+
+#ifdef __IPHONEOS__
+	bool aHasGameResources = false;
+	const char* aHome = std::getenv("HOME");
+	if (aHome != nullptr && aHome[0] != '\0')
+	{
+		const std::filesystem::path aDocsPath = std::filesystem::path(aHome) / "Documents";
+		aHasGameResources = std::filesystem::is_regular_file(aDocsPath / "main.pak") &&
+			std::filesystem::is_directory(aDocsPath / "properties");
+	}
+
+	if (!aHasGameResources)
+	{
+		SDL_Init(SDL_INIT_VIDEO);
+		SDL_ShowSimpleMessageBox(
+			SDL_MESSAGEBOX_ERROR,
+			"Resources Not Found",
+			"Please place main.pak and the properties/ folder into the "
+			"PvZ Portable folder using the Files app or Finder/iTunes file sharing.\n\n"
+			"The app will now exit.",
+			NULL
+		);
+		SDL_Quit();
+		return 1;
+	}
 #endif
 
 	TodStringListSetColors(gLawnStringFormats, gLawnStringFormatCount);

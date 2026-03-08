@@ -288,6 +288,7 @@ elseif (IOS)
 		XCODE_ATTRIBUTE_IPHONEOS_DEPLOYMENT_TARGET "15.0"
 		XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "io.github.wszqkzqk.pvz-portable"
 		XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "-"
+		XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_APPICON_NAME "AppIcon"
 	)
 
 	# Add launch storyboard to the bundle
@@ -295,5 +296,10 @@ elseif (IOS)
 		target_sources(pvz-portable PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/ios/LaunchScreen.storyboard")
 		set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/ios/LaunchScreen.storyboard"
 			PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+	endif()
+
+	# Add asset catalog (app icon)
+	if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/ios/Assets.xcassets")
+		target_sources(pvz-portable PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/ios/Assets.xcassets")
 	endif()
 endif()
