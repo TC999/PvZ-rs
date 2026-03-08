@@ -205,7 +205,11 @@ SexyAppBase::SexyAppBase()
 	mLastDrawTick = SDL_GetTicks();
 	mNextDrawTick = SDL_GetTicks();
 	mSysCursor = true;	
+#if defined(__IPHONEOS__) || (defined(__ANDROID__) && !defined(__TERMUX__)) || defined(__SWITCH__) || defined(__3DS__)
+	mForceFullscreen = true;
+#else
 	mForceFullscreen = false;
+#endif
 	mForceWindowed = false;
 	mHasFocus = true;			
 	mCustomCursorsEnabled = false;	
