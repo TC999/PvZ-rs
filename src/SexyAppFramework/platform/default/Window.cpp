@@ -40,15 +40,16 @@ void SexyAppBase::MakeWindow()
 {
 	if (mWindow)
 	{
+#if !defined(__IPHONEOS__) && !(defined(__ANDROID__) && !defined(__TERMUX__))
 		SDL_SetWindowFullscreen((SDL_Window*)mWindow, (!mIsWindowed ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0));
+#endif
 	}
 	else
 	{
 		// For Wayland's icon support on the game window
 		SDL_SetHint(SDL_HINT_APP_ID, "io.github.wszqkzqk.pvz-portable");
 
-#if defined(__ANDROID__) && !defined(__TERMUX__)
-		// Lock to landscape on Android; SDL's Java layer reads this hint
+#if (defined(__ANDROID__) && !defined(__TERMUX__)) || defined(__IPHONEOS__)
 		SDL_SetHint(SDL_HINT_ORIENTATIONS, "LandscapeLeft LandscapeRight");
 #endif
 
@@ -70,8 +71,8 @@ void SexyAppBase::MakeWindow()
 		if (mWindow)
 			mContext = (void*)SDL_GL_CreateContext((SDL_Window*)mWindow);
 
-#ifdef __ANDROID__
-		// Retry: EGL surface may be transiently unavailable on Android.
+#if defined(__ANDROID__) || defined(__IPHONEOS__)
+		// EGL/EAGL surface may be transiently unavailable on mobile
 		for (int retry = 0; !mContext && mWindow && retry < 20; retry++)
 		{
 			SDL_Delay(100);
@@ -81,7 +82,7 @@ void SexyAppBase::MakeWindow()
 		if (!mContext)
 		{
 			if (mWindow) { SDL_DestroyWindow((SDL_Window*)mWindow); mWindow = nullptr; }
-			fprintf(stderr, "Failed to create OpenGL ES context on Android.\n");
+			fprintf(stderr, "Failed to create OpenGL ES context.\n");
 			return;
 		}
 #else

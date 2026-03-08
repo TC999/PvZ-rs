@@ -282,12 +282,14 @@ endif()
 if(APPLE)
     find_library(APPLE_CORE_AUDIO CoreAudio)
     find_library(APPLE_IOKIT IOKit)
-    find_library(APPLE_COCOA Cocoa)
     find_library(APPLE_AUDIOTOOLBOX AudioToolbox)
     find_library(APPLE_CORE_VIDEO CoreVideo)
     find_library(APPLE_CORE_FOUNDATION CoreFoundation)
-    find_library(APPLE_CARBON Carbon)
-    find_library(APPLE_FORCE_FEEDBACK ForceFeedback)
+    if(NOT IOS)
+        find_library(APPLE_COCOA Cocoa)
+        find_library(APPLE_CARBON Carbon)
+        find_library(APPLE_FORCE_FEEDBACK ForceFeedback)
+    endif()
     check_library_exists(iconv iconv_open "" HAVE_LIBICONV)
     if(HAVE_LIBICONV)
         set(ICONV_LIB iconv)
@@ -295,14 +297,17 @@ if(APPLE)
 
     list(APPEND SDLMixerX_LINK_LIBS
             ${APPLE_CORE_AUDIO}
-            ${APPLE_COCOA}
             ${APPLE_CORE_VIDEO}
             ${APPLE_CORE_FOUNDATION}
-            ${APPLE_FORCE_FEEDBACK}
             ${APPLE_IOKIT}
-            ${APPLE_CARBON}
             ${APPLE_AUDIOTOOLBOX}
             ${ICONV_LIB})
+    if(NOT IOS)
+        list(APPEND SDLMixerX_LINK_LIBS
+                ${APPLE_COCOA}
+                ${APPLE_FORCE_FEEDBACK}
+                ${APPLE_CARBON})
+    endif()
     list(APPEND SDLMixerX_LINK_LIBS objc)
 endif()
 

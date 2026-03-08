@@ -32,6 +32,8 @@
 #include <math.h>
 #include <vector>
 #include <algorithm>
+#include <cstdlib>
+#include <filesystem>
 
 #include <SDL.h>
 
@@ -116,6 +118,19 @@ SexyAppBase::SexyAppBase()
 	{
 		mResourceDir = "";
 	}
+#elif defined(__IPHONEOS__)
+	// iOS: use Documents directory (visible in Files app via UIFileSharingEnabled)
+	{
+		const char* aHome = std::getenv("HOME");
+		if (aHome != nullptr && aHome[0] != '\0')
+		{
+			mResourceDir = (std::filesystem::path(aHome) / "Documents").generic_string() + "/";
+		}
+		else
+		{
+			mResourceDir = "";
+		}
+	}
 #else
 	char* aBasePath = SDL_GetBasePath();
 	if (aBasePath)
@@ -190,7 +205,11 @@ SexyAppBase::SexyAppBase()
 	mLastDrawTick = SDL_GetTicks();
 	mNextDrawTick = SDL_GetTicks();
 	mSysCursor = true;	
+#if defined(__IPHONEOS__) || (defined(__ANDROID__) && !defined(__TERMUX__)) || defined(__SWITCH__) || defined(__3DS__)
+	mForceFullscreen = true;
+#else
 	mForceFullscreen = false;
+#endif
 	mForceWindowed = false;
 	mHasFocus = true;			
 	mCustomCursorsEnabled = false;	
@@ -3066,6 +3085,14 @@ void SexyAppBase::Init()
 		if (aExtPath)
 		{
 			SetAppDataFolder(std::string(aExtPath) + "/");
+		}
+	}
+#elif defined(__IPHONEOS__)
+	{
+		const char* aHome = std::getenv("HOME");
+		if (aHome != nullptr && aHome[0] != '\0')
+		{
+			SetAppDataFolder((std::filesystem::path(aHome) / "Documents").generic_string() + "/");
 		}
 	}
 #elif !defined(__SWITCH__) && !defined(__3DS__)
