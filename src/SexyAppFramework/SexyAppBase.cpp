@@ -144,6 +144,17 @@ SexyAppBase::SexyAppBase()
 	}
 #elif defined(__EMSCRIPTEN__)
 	mResourceDir = "/";
+#elif defined(__APPLE__)
+	char* aBasePath = SDL_GetPrefPath(NULL, "PvZPortable");
+	if (aBasePath)
+	{
+		mResourceDir = aBasePath;
+		SDL_free(aBasePath);
+	}
+	else
+	{
+		mResourceDir = "";
+	}
 #else
 	char* aBasePath = SDL_GetBasePath();
 	if (aBasePath)
@@ -3215,6 +3226,15 @@ void SexyAppBase::Init()
 #elif defined(__EMSCRIPTEN__)
 	{
 		SetAppDataFolder("/saves/");
+	}
+#elif defined(__APPLE__)
+	{
+		char* aPrefPath = SDL_GetPrefPath(NULL, "PvZPortable");
+		if (aPrefPath)
+		{
+			SetAppDataFolder(aPrefPath);
+			SDL_free(aPrefPath);
+		}
 	}
 #elif !defined(__SWITCH__) && !defined(__3DS__)
 	{
