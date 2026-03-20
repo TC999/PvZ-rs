@@ -289,7 +289,15 @@ bool SexyAppBase::ProcessDeferredMessages(bool singleMessage)
 #endif
 
 	SDL_Event event;
-	if (SDL_PollEvent(&event))
+#ifdef __EMSCRIPTEN__
+	// Drain a bounded batch per tick to avoid remaining stuck in message stage.
+	constexpr int MAX_EVENTS_PER_TICK = 128;
+#else
+	constexpr int MAX_EVENTS_PER_TICK = 1;
+#endif
+
+	int aHandledEvents = 0;
+	while (aHandledEvents < MAX_EVENTS_PER_TICK && SDL_PollEvent(&event))
 	{
 		switch(event.type)
 		{
@@ -349,7 +357,7 @@ bool SexyAppBase::ProcessDeferredMessages(bool singleMessage)
 				mWidgetManager->RemapMouse(x, y);
 
 				mLastUserInputTick = mLastTimerTime;
-				
+
 				mWidgetManager->MouseMove(x, y);
 				break;
 			}
@@ -364,7 +372,7 @@ bool SexyAppBase::ProcessDeferredMessages(bool singleMessage)
 				mWidgetManager->RemapMouse(x, y);
 
 				mLastUserInputTick = mLastTimerTime;
-				
+
 				mWidgetManager->MouseMove(x, y);
 				int btn =
 					(event.button.button == SDL_BUTTON_LEFT) ? 1 :
@@ -387,7 +395,7 @@ bool SexyAppBase::ProcessDeferredMessages(bool singleMessage)
 				mWidgetManager->RemapMouse(x, y);
 
 				mLastUserInputTick = mLastTimerTime;
-				
+
 				mWidgetManager->MouseMove(x, y);
 				int btn =
 					(event.button.button == SDL_BUTTON_LEFT) ? 1 :
@@ -413,7 +421,10 @@ bool SexyAppBase::ProcessDeferredMessages(bool singleMessage)
 				mWidgetManager->KeyChar((char)event.text.text[0]);
 				break;
 		}
+
+		aHandledEvents++;
 	}
 
+	(void)singleMessage;
 	return SDL_HasEvents(SDL_FIRSTEVENT, SDL_LASTEVENT);
 }
