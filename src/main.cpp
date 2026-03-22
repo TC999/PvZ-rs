@@ -112,6 +112,20 @@ int main(int argc, char** argv)
 	if (aHome != nullptr && aHome[0] != '\0')
 	{
 		const std::filesystem::path aDocsPath = std::filesystem::path(aHome) / "Documents";
+		std::filesystem::create_directories(aDocsPath);
+
+		// Create a file in the Documents folder, or the app folder won't show up in the Files app on iOS
+		const std::filesystem::path aReadmePath = aDocsPath / "README.txt";
+		if (!std::filesystem::exists(aReadmePath))
+		{
+			FILE* f = fopen(aReadmePath.string().c_str(), "w");
+			if (f)
+			{
+				fputs("Place your main.pak and properties/ folder here to play the game.\n", f);
+				fclose(f);
+			}
+		}
+
 		aHasGameResources = std::filesystem::is_regular_file(aDocsPath / "main.pak") &&
 			std::filesystem::is_directory(aDocsPath / "properties");
 	}
