@@ -7644,7 +7644,7 @@ void Board::Draw(Graphics* g)
 	if (mDrawCount && mCutScene->mPreloaded)
 	{
 		int64_t aTickCount = SDL_GetTicks();
-		int64_t aIntervalDraws = mDrawCount - mIntervalDrawCountStart;
+		int64_t aIntervalDraws = static_cast<int64_t>(mDrawCount) - static_cast<int64_t>(mIntervalDrawCountStart);
 		int64_t aInterval = aTickCount - mIntervalDrawTime;
 		if (aInterval > 10000)
 		{
