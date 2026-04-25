@@ -231,18 +231,18 @@ void AchievementsWidget::MouseWheel(int theDelta) {
 }
 
 // GOTY @Patoke: 0x459670
-void ReportAchievement::GiveAchievement(LawnApp* theApp, int theAchievement, bool theForceGive) {
+bool ReportAchievement::GiveAchievement(LawnApp* theApp, int theAchievement, bool theForceGive) {
 	// todo @Patoke: finish adding the achievement give events
 	if (!theApp->mPlayerInfo)
-		return;
+		return false;
 
 	if (theApp->mPlayerInfo->mEarnedAchievements[theAchievement])
-		return;
+		return false;
 
 	theApp->mPlayerInfo->mEarnedAchievements[theAchievement] = true;
 
 	if (!theForceGive)
-		return;
+		return true;
 
 	std::string aAchievementName = theApp->GetString(gAchievementList[theAchievement].name, gAchievementList[theAchievement].name);
 	std::string aFormat = theApp->GetString("%s Achievement!", "%s Achievement!");
@@ -251,37 +251,39 @@ void ReportAchievement::GiveAchievement(LawnApp* theApp, int theAchievement, boo
 	if (theApp->mBoard)
 		theApp->mBoard->DisplayAdvice(aMessage, MESSAGE_STYLE_ACHIEVEMENT, AdviceType::ADVICE_NONE);
 	theApp->PlaySample(SOUND_ACHIEVEMENT);
+	
+	return true;
 }
 
 // GOTY @Patoke: 0x44D5B0
-void ReportAchievement::AchievementInitForPlayer(LawnApp* theApp) {
-	if (!theApp || !theApp->mPlayerInfo)
+void ReportAchievement::AchievementInitForPlayer(GameSelector* theSelector) {
+	if (!theSelector->mApp || !theSelector->mApp->mPlayerInfo)
 		return;
 	// @windowslover1234, for whatever reason, these three checks cause crashes on Windows, but not Linux.
-	if (theApp->HasFinishedAdventure()) {
-		GiveAchievement(theApp, AchievementId::HomeSecurity, true);
+	if (theSelector->mApp->HasFinishedAdventure()) {
+		GiveAchievement(theSelector->mApp, AchievementId::HomeSecurity, true);
 	}
 
-	if (theApp->EarnedGoldTrophy()) {
-		GiveAchievement(theApp, AchievementId::NovelPeasPrize, true);
+	if (theSelector->mApp->EarnedGoldTrophy()) {
+		GiveAchievement(theSelector->mApp, AchievementId::NovelPeasPrize, true);
 	}
 
-	if (theApp->CanSpawnYetis()) {
-		GiveAchievement(theApp, AchievementId::Zombologist, true);
+	if (theSelector->mApp->CanSpawnYetis()) {
+		GiveAchievement(theSelector->mApp, AchievementId::Zombologist, true);
 	}
 
-	int aTreeSize = theApp->mPlayerInfo->mChallengeRecords[GAMEMODE_TREE_OF_WISDOM - GAMEMODE_SURVIVAL_NORMAL_STAGE_1];
+	int aTreeSize = theSelector->mApp->mPlayerInfo->mChallengeRecords[GAMEMODE_TREE_OF_WISDOM - GAMEMODE_SURVIVAL_NORMAL_STAGE_1];
 	if (aTreeSize >= 100) {
-		GiveAchievement(theApp, AchievementId::ToweringWisdom, true);
+		GiveAchievement(theSelector->mApp, AchievementId::ToweringWisdom, true);
 	}
 
 	bool aGiveAchievement = true;
 	for (int i = STORE_ITEM_PLANT_GATLINGPEA; i <= STORE_ITEM_PLANT_IMITATER; i++) {
-		if (theApp->HasSeedType(SeedType(i)))
+		if (theSelector->mApp->SeedTypeAvailable(SeedType(i)))
 			aGiveAchievement = false;
 	}
 
 	if (aGiveAchievement) {
-		GiveAchievement(theApp, AchievementId::Morticulturalist, aGiveAchievement);
+		GiveAchievement(theSelector->mApp, AchievementId::Morticulturalist, aGiveAchievement);
 	}
 }

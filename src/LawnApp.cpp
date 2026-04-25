@@ -104,6 +104,7 @@ bool LawnHasUsedCheatKeys()
 	return gLawnApp && gLawnApp->mPlayerInfo && gLawnApp->mPlayerInfo->mHasUsedCheatKeys;
 }
 
+// GOTY @Patoke: 0x451D70
 LawnApp::LawnApp()
 {
 	mBoard = nullptr;

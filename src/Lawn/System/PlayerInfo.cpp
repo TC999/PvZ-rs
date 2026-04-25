@@ -71,6 +71,7 @@ void PlayerInfo::SyncSummary(DataSync& theSync)
 	theSync.SyncUInt32(mId);
 }
 
+// GOTY @Patoke: 0x46BE80
 void PlayerInfo::SyncDetails(DataSync& theSync)
 {
 	if (theSync.GetReader())
@@ -209,6 +210,7 @@ void PlayerInfo::DeleteUserFiles()
 	}
 }
 
+// GOTY @Patoke: 0x46DBF0
 void PlayerInfo::Reset()
 {
 	mLevel = 1;

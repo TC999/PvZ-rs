@@ -281,7 +281,7 @@ void ReanimationFreeDefinition(ReanimatorDefinition* theDefinition)
 	}
 
 	// 释放定义
-	DefinitionFreeMap(&gReanimatorDefMap, theDefinition);
+	DefinitionFreeMap(&gReanimatorDefMap, (char*)theDefinition);
 }
 
 ReanimatorTrackInstance::ReanimatorTrackInstance()

@@ -218,7 +218,7 @@ bool                    DefinitionLoadImage(Image** theImage, const std::string&
 bool                    DefinitionLoadFont(_Font** theFont, const std::string& theName);
 bool                    DefinitionLoadXML(const std::string& theFilename, DefMap* theDefMap, void* theDefinition);
 void                    DefinitionFreeArrayField(DefinitionArrayDef* theArray, DefMap* theDefMap);
-void                    DefinitionFreeMap(DefMap* theDefMap, void* theDefinition);
+void                    DefinitionFreeMap(DefMap* theDefMap, char* theDefinition);
 
 /*inline*/ bool         FloatTrackIsSet(const FloatParameterTrack& theTrack);
 /*inline*/ void         FloatTrackSetDefault(FloatParameterTrack& theTrack, float theValue);

@@ -1706,12 +1706,17 @@ void Board::StartLevel()
 	mApp->mLastLevelStats->Reset();
 	mChallenge->StartLevel();
 
-	// @Patoke: implemented, i think it's intentional to cause an underflow here?
-	unsigned int aSurvivalStage = mApp->mGameMode - GAMEMODE_SURVIVAL_ENDLESS_STAGE_1;
-	if (aSurvivalStage <= 4) {
+	if (mApp->mGameMode == GameMode::GAMEMODE_SURVIVAL_ENDLESS_STAGE_1 ||
+		mApp->mGameMode == GameMode::GAMEMODE_SURVIVAL_ENDLESS_STAGE_2 ||
+		mApp->mGameMode == GameMode::GAMEMODE_SURVIVAL_ENDLESS_STAGE_3 ||
+		mApp->mGameMode == GameMode::GAMEMODE_SURVIVAL_ENDLESS_STAGE_4 ||
+		mApp->mGameMode == GameMode::GAMEMODE_SURVIVAL_ENDLESS_STAGE_5) 
+	{
 		if (GetSurvivalFlagsCompleted() >= 20) {
-			// if ( !*(mApp->mPlayerInfo + 53) ) todo @Patoke: add this?
-			ReportAchievement::GiveAchievement(mApp, Immortal, true);
+			if (mApp->mPlayerInfo && !mApp->mPlayerInfo->mEarnedAchievements[Immortal])
+			{
+				ReportAchievement::GiveAchievement(mApp, Immortal, true);
+			}
 		}
 	}
 
@@ -8629,8 +8634,12 @@ void Board::AddSunMoney(int theAmount)
 		mSunMoney = 9990;
 	}
 	if (mSunMoney >= 8000)
-		// if ( !*(mApp->mPlayerInfo + 48) ) todo @Patoke: figure this out
-		ReportAchievement::GiveAchievement(mApp, SunnyDays, true);
+	{
+		if (mApp->mPlayerInfo && !mApp->mPlayerInfo->mEarnedAchievements[SunnyDays])
+		{
+			ReportAchievement::GiveAchievement(mApp, SunnyDays, true);
+		}
+	}
 }
 
 int Board::CountSunBeingCollected()

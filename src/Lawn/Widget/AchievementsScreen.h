@@ -27,6 +27,7 @@
 #include "widget/Widget.h"
 
 class LawnApp;
+class GameSelector;
 
 using namespace Sexy;
 
@@ -86,8 +87,8 @@ public:
 
 class ReportAchievement {
 public:
-	static void GiveAchievement(LawnApp* theApp, int theAchievement, bool theForceGive);
-	static void AchievementInitForPlayer(LawnApp* theApp);
+	static bool GiveAchievement(LawnApp* theApp, int theAchievement, bool theForceGive);
+	static void AchievementInitForPlayer(GameSelector* theSelector);
 };
 
 #endif

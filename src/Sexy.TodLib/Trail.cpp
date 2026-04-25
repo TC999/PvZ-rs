@@ -89,7 +89,7 @@ void TrailLoadDefinitions(TrailParams* theTrailParamArray, int theTrailParamArra
 void TrailFreeDefinitions()
 {
 	for (int i = 0; i < gTrailDefCount; i++)
-		DefinitionFreeMap(&gTrailDefMap, &gTrailDefArray[i]);
+		DefinitionFreeMap(&gTrailDefMap, (char*)&gTrailDefArray[i]);
 	delete[] gTrailDefArray;
 	gTrailDefArray = nullptr;
 	gTrailDefCount = 0;

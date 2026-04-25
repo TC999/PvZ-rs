@@ -303,7 +303,7 @@ void TodFoley::PlayFoleyPitch(FoleyType theFoleyType, float thePitch)
 	aSoundInstance->Play(aIsLooping, false);  // 正式开始播放音效
 }
 
-// GOTY @Patoke: 0x51F6F0
+// GOTY @Patoke: 0x51F900
 void TodFoley::PlayFoley(FoleyType theFoleyType)
 {
 	FoleyParams* aFoleyParams = LookupFoley(theFoleyType);

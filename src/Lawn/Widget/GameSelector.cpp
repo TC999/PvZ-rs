@@ -574,7 +574,7 @@ void GameSelector::SyncProfile(bool theShowLoading)
 	SyncButtons();
 	AlmanacInitForPlayer();
 	BoardInitForPlayer();
-	ReportAchievement::AchievementInitForPlayer(mApp); // @Patoke: add call
+	ReportAchievement::AchievementInitForPlayer(this); // @Patoke: add call
 }
 
 // GOTY @Patoke: seems to be inlined? 0x44DCC6

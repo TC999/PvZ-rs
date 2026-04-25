@@ -2506,6 +2506,7 @@ void Plant::UpdateBowling()
     }
 }
 
+// GOTY @Patoke: 0x466B70
 void Plant::UpdateAbilities()
 {
     if (!IsInPlay())
