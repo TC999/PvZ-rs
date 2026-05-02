@@ -23,6 +23,7 @@
 #include "Board.h"
 #include "../ConstEnums.h"
 #include "Zombie.h"
+#include "System/Zombatar.h"
 #include "Cutscene.h"
 #include "GridItem.h"
 #include "LawnMower.h"
@@ -173,6 +174,12 @@ void Zombie::ZombieInitialize(int theRow, ZombieType theType, bool theVariant, Z
     mBossMode = 0;
     mBossFireBallReanimID = ReanimationID::REANIMATIONID_NULL;
     mSpecialHeadReanimID = ReanimationID::REANIMATIONID_NULL;
+    mZombatarHairID = ReanimationID::REANIMATIONID_NULL;
+    mZombatarTidbitID = ReanimationID::REANIMATIONID_NULL;
+    mZombatarEyeWearID = ReanimationID::REANIMATIONID_NULL;
+    mZombatarAccessoryID = ReanimationID::REANIMATIONID_NULL;
+    mZombatarHatID = ReanimationID::REANIMATIONID_NULL;
+    mZombatarHatLineID = ReanimationID::REANIMATIONID_NULL;
     mTargetRow = -1;
     mFireballRow = -1;
     mIsFireBall = false;
@@ -973,6 +980,8 @@ void Zombie::LoadPlainZombieReanim()
         EnableMustache(mBoard->mMustacheMode);
         EnableFuture(mBoard->mFutureMode);
     }
+
+    ApplyZombatar();
 
     if ((mBoard && mBoard->mPlantRow[mRow] == PlantRowType::PLANTROW_POOL && mFromWave != Zombie::ZOMBIE_WAVE_CUTSCENE) || mZombieType == ZombieType::ZOMBIE_DUCKY_TUBE)
     {
@@ -7312,6 +7321,12 @@ void Zombie::DieNoLoot()
     mApp->RemoveReanimation(mBodyReanimID);
     mApp->RemoveReanimation(mMoweredReanimID);
     mApp->RemoveReanimation(mSpecialHeadReanimID);
+    mApp->RemoveReanimation(mZombatarHairID);
+    mApp->RemoveReanimation(mZombatarTidbitID);
+    mApp->RemoveReanimation(mZombatarEyeWearID);
+    mApp->RemoveReanimation(mZombatarAccessoryID);
+    mApp->RemoveReanimation(mZombatarHatID);
+    mApp->RemoveReanimation(mZombatarHatLineID);
 
     mDead = true;
     TrySpawnLevelAward();
@@ -10597,4 +10612,98 @@ void Zombie::SetupWaterTrack(const char* theTrackName)
     aTrackInstance->mIgnoreExtraAdditiveColor = true;
     aTrackInstance->mIgnoreColorOverride = true;
     aTrackInstance->mIgnoreClipRect = true;
+}
+
+void Zombie::SetupZombatar(const ZombatarData& theData)
+{
+    Reanimation* aBodyReanim = mApp->ReanimationGet(mBodyReanimID);
+    ReanimatorTrackInstance* aHeadTrack = aBodyReanim->GetTrackInstanceByName("anim_head1");
+    if (aHeadTrack == nullptr) return;
+
+    // Apply skin color
+    int aSkinColorIdx = theData.mSelectedColors[(int)ZombatarCategory::ZombatarCategory_Skin];
+    if (aSkinColorIdx >= 0 && aSkinColorIdx < 12) {
+        aHeadTrack->mTrackColor = gZombatarSkinPalletes[aSkinColorIdx];
+    }
+
+    // Helper lambda to setup a part
+    auto SetupPart = [&](ZombatarCategory theCat, ReanimationID& thePartID, ReanimationID* theLineID, const char* theTrackPrefix, int theItemStart, int theItemEnd) {
+        int aItemIdx = theData.mSelectedItems[(int)theCat];
+        int aColorIdx = theData.mSelectedColors[(int)theCat];
+        
+        Reanimation* aReanim = mApp->AddReanimation(0.0f, 0.0f, 0, ReanimationType::REANIM_ZOMBATAR);
+        aReanim->PlayReanim("anim_head1", ReanimLoopType::REANIM_LOOP, 0, aBodyReanim->mAnimRate);
+        for (int i = 0; i < aReanim->mDefinition->mTracks.count; i++) aReanim->mTrackInstances[i].mRenderGroup = RENDER_GROUP_HIDDEN;
+        thePartID = mApp->ReanimationGetID(aReanim);
+        
+        AttachEffect* aAttach = AttachReanim(aHeadTrack->mAttachmentID, aReanim, 0, 0);
+        aAttach->mDontDrawIfParentHidden = true;
+        TodScaleRotateTransformMatrix(aAttach->mOffset, -20.0f, -2.5f, 0.2f, 1.0f, 1.0f);
+
+        Reanimation* aLineReanim = nullptr;
+        if (theLineID) {
+            aLineReanim = mApp->AddReanimation(0.0f, 0.0f, 0, ReanimationType::REANIM_ZOMBATAR);
+            aLineReanim->PlayReanim("anim_head1", ReanimLoopType::REANIM_LOOP, 0, aBodyReanim->mAnimRate);
+            for (int i = 0; i < aLineReanim->mDefinition->mTracks.count; i++) aLineReanim->mTrackInstances[i].mRenderGroup = RENDER_GROUP_HIDDEN;
+            *theLineID = mApp->ReanimationGetID(aLineReanim);
+            AttachEffect* aLineAttach = AttachReanim(aHeadTrack->mAttachmentID, aLineReanim, 0, 0);
+            aLineAttach->mDontDrawIfParentHidden = true;
+            TodScaleRotateTransformMatrix(aLineAttach->mOffset, -20.0f, -2.5f, 0.2f, 1.0f, 1.0f);
+        }
+
+        if (theCat == ZombatarCategory::ZombatarCategory_Hairs) aReanim->AssignRenderGroupToTrack("anim_hair", aItemIdx != -1 ? RENDER_GROUP_HIDDEN : RENDER_GROUP_NORMAL);
+
+        for (int i = theItemStart; i <= theItemEnd; i++) {
+            ZombatarDefinition& aDef = GetZombatarDefinition((ZombatarItem)i);
+            int aItemNum = i - theItemStart;
+            // Handle accessory special numbering if needed (mapping from source)
+            if (theCat == ZombatarCategory::ZombatarCategory_Accessories) {
+                if (aItemNum == 5) aItemNum = 14; else if (aItemNum == 6) aItemNum = 5; else if (aItemNum == 7) aItemNum = 6;
+                else if (aItemNum == 8) aItemNum = 12; else if (aItemNum == 9) aItemNum = 7; else if (aItemNum == 10) aItemNum = 9;
+                else if (aItemNum == 11) aItemNum = 10; else if (aItemNum == 12) aItemNum = 11; else if (aItemNum == 14) aItemNum = 8;
+            }
+
+            std::string aTrackName = StrFormat("%s_%02d", theTrackPrefix, aItemNum);
+            std::string aLineTrackName = aTrackName + "_line";
+
+            if (aReanim->TrackExists(aTrackName.c_str())) {
+                ReanimatorTrackInstance* aTrack = aReanim->GetTrackInstanceByName(aTrackName.c_str());
+                aTrack->mTrackColor = (aColorIdx == -1 || !aDef.mColorGroup) ? Color::White : aDef.mColorGroup[aColorIdx];
+            }
+
+            if (i == aItemIdx) {
+                aReanim->AssignRenderGroupToTrack(aTrackName.c_str(), RENDER_GROUP_NORMAL);
+                if (aLineReanim && aLineReanim->TrackExists(aLineTrackName.c_str())) aLineReanim->AssignRenderGroupToTrack(aLineTrackName.c_str(), RENDER_GROUP_NORMAL);
+            }
+        }
+    };
+
+    SetupPart(ZombatarCategory::ZombatarCategory_Tidbits, mZombatarTidbitID, nullptr, "tidBits", (int)ZombatarItem::ZOMBATAR_TIDBIT_1, (int)ZombatarItem::ZOMBATAR_TIDBIT_14);
+    SetupPart(ZombatarCategory::ZombatarCategory_FacialHair, mZombatarFacialHairID, nullptr, "facialHair", (int)ZombatarItem::ZOMBATAR_FACIAL_HAIR_1, (int)ZombatarItem::ZOMBATAR_FACIAL_HAIR_24);
+    SetupPart(ZombatarCategory::ZombatarCategory_Hairs, mZombatarHairID, &mZombatarHairLineID, "hair", (int)ZombatarItem::ZOMBATAR_HAIR_1, (int)ZombatarItem::ZOMBATAR_HAIR_16);
+    SetupPart(ZombatarCategory::ZombatarCategory_EyeWears, mZombatarEyeWearID, &mZombatarEyeWearLineID, "eyeWear", (int)ZombatarItem::ZOMBATAR_EYEWEAR_1, (int)ZombatarItem::ZOMBATAR_EYEWEAR_16);
+    SetupPart(ZombatarCategory::ZombatarCategory_Accessories, mZombatarAccessoryID, nullptr, "accessories", (int)ZombatarItem::ZOMBATAR_ACCESSORY_1, (int)ZombatarItem::ZOMBATAR_ACCESSORY_15);
+    SetupPart(ZombatarCategory::ZombatarCategory_Hats, mZombatarHatID, &mZombatarHatLineID, "hats", (int)ZombatarItem::ZOMBATAR_HAT_1, (int)ZombatarItem::ZOMBATAR_HAT_14);
+}
+
+void Zombie::ApplyZombatar()
+{
+    if (mApp->mPlayerInfo == nullptr || mApp->mPlayerInfo->mZombatarHeadCount == 0)
+        return;
+
+    if (mZombieType != ZombieType::ZOMBIE_NORMAL && mZombieType != ZombieType::ZOMBIE_DUCKY_TUBE && mZombieType != ZombieType::ZOMBIE_FLAG)
+        return;
+
+    // Use a random Zombatar if multiple are present
+    int aZombatarIndex = Rand((int)mApp->mPlayerInfo->mZombatarHeadCount);
+    const unsigned char* aRawData = &mApp->mPlayerInfo->mZombatarData[aZombatarIndex * 0x48];
+
+    ZombatarData aData;
+    for (int i = 0; i < (int)ZombatarCategory::MAX_ZOMBATAR_CATEGORIES; i++)
+    {
+        aData.mSelectedItems[i] = (int)((int8_t)aRawData[i]);
+        aData.mSelectedColors[i] = (int)((int8_t)aRawData[i + 20]); // Colors offset in original GOTY
+    }
+    
+    SetupZombatar(aData);
 }

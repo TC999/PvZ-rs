@@ -141,6 +141,21 @@ void PlayerInfo::SyncDetails(DataSync& theSync)
 		}
 	}
 
+    theSync.SyncUInt8(mZombatarAccepted);
+    theSync.SyncUInt32(mZombatarHeadCount);
+    if (theSync.GetReader())
+    {
+        mZombatarData.resize(mZombatarHeadCount * 0x48);
+    }
+    if (mZombatarHeadCount > 0)
+    {
+        theSync.SyncBytes(mZombatarData.data(), mZombatarHeadCount * 0x48);
+    }
+    theSync.SyncBytes(mZombatarTrailingUnknown, sizeof(mZombatarTrailingUnknown));
+    theSync.SyncUInt8(mZombatarCreatedBefore);
+    theSync.SyncBool(mAckZombatarTOS);
+
+
 	// Zombatar is not supported: ignore any stored data on load.
 	if (theSync.GetReader())
 	{
@@ -245,6 +260,7 @@ void PlayerInfo::Reset()
 	mZombatarData.clear();
 	memset(mZombatarTrailingUnknown, 0, sizeof(mZombatarTrailingUnknown));
 	mZombatarCreatedBefore = 0;
+	mAckZombatarTOS = false;
 }
 
 void PlayerInfo::AddCoins(int theAmount)

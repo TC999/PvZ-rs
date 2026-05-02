@@ -25,6 +25,12 @@
 #include <cstdint>
 #include "GameObject.h"
 #include "../GameConstants.h"
+#include "../ConstEnums.h"
+struct ZombatarData
+{
+    int32_t     mSelectedItems[MAX_ZOMBATAR_CATEGORIES];
+    int32_t     mSelectedColors[MAX_ZOMBATAR_CATEGORIES];
+};
 
 #define MAX_ZOMBIE_FOLLOWERS 4
 #define NUM_BOBSLED_FOLLOWERS 3
@@ -184,6 +190,16 @@ public:
     bool                            mIsFireBall;
     ReanimationID                   mMoweredReanimID;
     int32_t                         mLastPortalX;
+    ReanimationID                   mZombatarTidbitID;
+    ReanimationID                   mZombatarFacialHairID;
+    ReanimationID                   mZombatarHairID;
+    ReanimationID                   mZombatarHairLineID;
+    ReanimationID                   mZombatarEyeWearID;
+    ReanimationID                   mZombatarEyeWearLineID;
+    ReanimationID                   mZombatarAccessoryID;
+    ReanimationID                   mZombatarHatID;
+    ReanimationID                   mZombatarHatLineID;
+
 
 public:
     Zombie();
@@ -249,6 +265,8 @@ public:
     void                            LandFlyer(unsigned int theDamageFlags);
     void                            UpdateZombieDigger();
     bool                            IsWalkingBackwards();
+    void                            SetupZombatar(const ZombatarData& theData);
+    void                            ApplyZombatar();
     TodParticleSystem*              AddAttachedParticle(int thePosX, int thePosY, ParticleEffect theEffect);
     void                            PogoBreak(unsigned int theDamageFlags);
     void                            UpdateZombieFalling();

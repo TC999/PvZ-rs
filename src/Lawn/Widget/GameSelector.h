@@ -156,4 +156,4 @@ public:
     virtual void Draw(Graphics* g);
 };
 
-#endif
+#endif // __GAMESELECTOR_H__

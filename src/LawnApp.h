@@ -105,6 +105,7 @@ public:
 	ProfileMgr*						mProfileMgr;
 	PlayerInfo*						mPlayerInfo;
 	LevelStats*						mLastLevelStats;
+        class ZombatarWidget*           mZombatarWidget;
 	bool							mCloseRequest;
 	uint32_t						mAppCounter;
 	Music*							mMusic;
@@ -188,6 +189,9 @@ public:
 	void							KillGameSelector();
 	void							ShowAwardScreen(AwardType theAwardType, bool theShowAchievements); // @Patoke: add argument
 	void							KillAwardScreen();
+        void                            ShowZombatarScreen();
+        void                            KillZombatarScreen();
+        void                            ShowZombatarTOS();
 	void							ShowSeedChooserScreen();
 	void							KillSeedChooserScreen();
 	void							DoHighScoreDialog();

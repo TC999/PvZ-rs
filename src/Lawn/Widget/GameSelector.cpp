@@ -1363,10 +1363,10 @@ void GameSelector::ButtonDepress(int theId)
 			mApp->mZenGarden->SetupForZenTutorial();
 		break;
 	case GameSelector::GameSelector_Zombatar:
-		//if (mApp->mPlayerInfo->mAckZombatarTOS)
-		//	GameSelector::ShowZombatarScreen();
-		//else
-		//	LawnApp::ShowZombatarTOS();
+		if (mApp->mPlayerInfo->mAckZombatarTOS)
+			mApp->ShowZombatarScreen();
+		else
+			mApp->ShowZombatarTOS();
 		break;
 	case GameSelector::GameSelector_AchievementsBack: // @Patoke: seems to be unused
 		//SlideTo(0, 0);
