@@ -1,8 +1,21 @@
 cmake_minimum_required(VERSION 3.5...4.0)
 
+if(DEFINED CMAKE_TOOLCHAIN_FILE AND CMAKE_TOOLCHAIN_FILE MATCHES "([/\\\\]|^)vcpkg\\.cmake$")
+	set(VCPKG_MANIFEST_MODE ON CACHE BOOL "Use vcpkg manifest mode to install dependencies from vcpkg.json")
+endif()
+
 project(pvz-portable LANGUAGES C CXX ASM)
 
 find_package(Python3 COMPONENTS Interpreter)
+
+set(PVZ_USING_VCPKG OFF)
+if(DEFINED VCPKG_TOOLCHAIN)
+	set(PVZ_USING_VCPKG ON)
+elseif(DEFINED CMAKE_TOOLCHAIN_FILE AND CMAKE_TOOLCHAIN_FILE MATCHES "([/\\\\]|^)vcpkg\\.cmake$")
+	set(PVZ_USING_VCPKG ON)
+elseif(DEFINED VCPKG_INSTALLED_DIR)
+	set(PVZ_USING_VCPKG ON)
+endif()
 
 option(BUILD_STATIC "Static link for a standalone exe (Windows, non-MSVC)" OFF)
 if(BUILD_STATIC)
@@ -92,7 +105,7 @@ elseif(EMSCRIPTEN)
 		${CMAKE_CURRENT_SOURCE_DIR}/src/SexyAppFramework/platform/emscripten
 	)
 else()
-	if(VCPKG_TOOLCHAIN)
+	if(PVZ_USING_VCPKG)
 		find_package(Vorbis CONFIG REQUIRED)
 		find_package(Ogg CONFIG REQUIRED)
 		find_package(libopenmpt CONFIG REQUIRED)

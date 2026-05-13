@@ -197,6 +197,18 @@ You can install the required dependencies using the following command:
 sudo apt install cmake ninja-build libogg-dev libjpeg-dev libopenmpt-dev libpng-dev libvorbis-dev libmpg123-dev libsdl2-dev
 ```
 
+### Windows (Visual Studio / CLion / vcpkg)
+
+When using Visual Studio, CLion, or any CMake command with the vcpkg toolchain file, dependencies are installed from `vcpkg.json` automatically during CMake configure:
+
+```powershell
+cmake -G "Visual Studio 17 2022" `
+  -DCMAKE_TOOLCHAIN_FILE=C:\path\to\vcpkg\scripts\buildsystems\vcpkg.cmake `
+  -S . -B build
+```
+
+If you want a standalone MSVC executable, use a static vcpkg triplet, for example `-DVCPKG_TARGET_TRIPLET=x64-windows-static`.
+
 ### Windows (MSYS2 UCRT64)
 
 You can install the required dependencies using the following command:
