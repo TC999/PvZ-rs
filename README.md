@@ -63,6 +63,25 @@ This project supports the following platforms (including but not limited to):
 
 To play the game, you need the game data from PvZ GOTY. Place `main.pak` and the `properties/` folder next to the `pvz-portable` executable (the game will search for resources relative to the executable's directory). You can also use extracted data instead of `main.pak` if you prefer. If either `main.pak` or `properties/` is missing, PvZ Portable opens the resource manager instead of starting the game.
 
+### Optional resource submodule packing
+
+If you maintain a private resource repository, initialize it as the root `res/` submodule:
+
+```bash
+git submodule update --init --recursive res
+```
+
+During CMake builds, `PVZ_AUTO_PACK_RESOURCES` is enabled by default. When `res/` contains legal game resources, CMake runs `tools/pack_resources.py` with `resources/resource-pack.json`, generates `build/generated/resources/main.pak`, copies loose `properties/`, then stages the result for the active platform:
+
+- Linux / Windows: next to the built executable.
+- macOS: inside the `.app` bundle `Contents/Resources`.
+- iOS: inside the `.app` bundle.
+- Android: under `android/app/src/main/assets`.
+- WebAssembly: preloaded into the virtual filesystem root.
+- Switch / 3DS: under the build output's `PvZPortable` resource folder for SD-card deployment.
+
+If `res/` is missing or empty, packing is skipped and the runtime resource manager remains the fallback. Use `-DPVZ_AUTO_PACK_RESOURCES=OFF` to disable this build step.
+
 Note about writable data and caches:
 
 - The game will read resources (like `main.pak` and `properties/`) from the executable directory by default, so you can launch the binary from any working directory and it will still find them.
