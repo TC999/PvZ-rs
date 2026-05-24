@@ -229,9 +229,16 @@ void LawnDialog::KeyDown(KeyCode theKey)
         {
             Dialog::ButtonDepress(Dialog::ID_YES);
         }
-        else if ((theKey == KEYCODE_ESCAPE || theKey == 'n' || theKey == 'N') && mLawnNoButton)
+        else if (theKey == KEYCODE_ESCAPE || theKey == 'n' || theKey == 'N')
         {
-            Dialog::ButtonDepress(Dialog::ID_NO);
+            if (mLawnNoButton)
+            {
+                Dialog::ButtonDepress(Dialog::ID_NO);
+            }
+            else if (theKey == KEYCODE_ESCAPE && mLawnYesButton)
+            {
+                Dialog::ButtonDepress(Dialog::ID_YES);
+            }
         }
     }
 }
@@ -478,6 +485,18 @@ GameOverDialog::~GameOverDialog()
     delete mMenuButton;
 }
 
+void GameOverDialog::KeyDown(KeyCode theKey)
+{
+    if (theKey == KeyCode::KEYCODE_ESCAPE)
+    {
+        ButtonDepress(1);
+        return;
+    }
+
+    LawnDialog::KeyDown(theKey);
+}
+
+//0x457E50
 void GameOverDialog::ButtonDepress(int theId)
 {
     if (theId == 1)
