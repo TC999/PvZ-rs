@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">PvZ Portable</string>
+
+    <!-- ResourceImportActivity -->
+    <string name="status_ready">已找到游戏资源。准备开始游戏！</string>
+    <string name="status_missing">未找到游戏资源。\n请导入 main.pak + properties/ 目录以继续。</string>
+
+    <string name="section_import_resources">导入游戏资源</string>
+    <string name="import_help">选择包含合法购买的 main.pak 文件和 properties/ 目录的 ZIP 文件或文件夹。</string>
+    <string name="btn_pick_zip">选择ZIP文件</string>
+    <string name="btn_pick_dir">选择资源文件夹</string>
+
+    <string name="section_save_data">导入/导出存档数据（可选）</string>
+    <string name="btn_export_save">导出存档数据</string>
+    <string name="btn_import_save_zip">导入存档ZIP</string>
+    <string name="btn_import_save_dir">导入存档文件夹</string>
+
+    <string name="btn_launch_game">开始游戏</string>
+
+    <string name="import_success">导入成功完成！</string>
+    <string name="import_failed">导入失败：%1$s</string>
+    <string name="export_success">存档数据导出成功！</string>
+    <string name="export_failed">导出失败：%1$s</string>
+    <string name="no_save_data">未找到可导出的存档数据。</string>
+    <string name="shortcut_manage_data">管理数据</string>
+    <string name="shortcut_manage_data_long">管理资源和存档</string>
+</resources>
