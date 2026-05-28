@@ -1,14 +1,15 @@
 // 对应 C++ 中的 Board.h / Board.cpp - 游戏主棋盘
 
 use crate::const_enums::*;
+use crate::framework::graphics::graphics::Graphics;
+use sdl2::render::Canvas;
+use sdl2::video::Window;
 
 pub struct Board {
     pub board_result: BoardResult,
     pub game_mode: GameMode,
     pub width: i32,
     pub height: i32,
-    // C++ 中的 Board 包含大量成员变量和方法
-    // 这里仅保留骨架，具体逻辑需要在后续迭代中填充
     pub grid_items: Vec<Option<GridItemType>>,
     pub grid_square_types: Vec<GridSquareType>,
     pub num_columns: i32,
@@ -37,17 +38,17 @@ impl Board {
         // TODO: 实现游戏主循环更新逻辑
     }
 
-    pub fn draw(&self) {
+    pub fn draw(&self, _g: &Graphics, _canvas: &mut Canvas<Window>) {
         // TODO: 实现游戏绘制逻辑
     }
 
     pub fn reset(&mut self) {
         self.board_result = BoardResult::None;
     }
-}
 
-impl Default for Board {
-    fn default() -> Self {
-        Self::new()
-    }
+    pub fn key_down(&mut self, _key: i32) {}
+    pub fn key_up(&mut self, _key: i32) {}
+    pub fn mouse_down(&mut self, _x: i32, _y: i32, _clicks: i32) {}
+    pub fn mouse_up(&mut self, _x: i32, _y: i32, _clicks: i32) {}
+    pub fn mouse_move(&mut self, _x: i32, _y: i32) {}
 }

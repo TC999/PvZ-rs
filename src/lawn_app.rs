@@ -18,6 +18,7 @@ use crate::lawn::system::player_info::PlayerInfo;
 use crate::lawn::system::pool_effect::PoolEffect;
 use crate::lawn::system::typing_check::TypingCheck;
 use crate::lawn::zen_garden::ZenGarden;
+use crate::framework::graphics::graphics::Graphics;
 
 pub struct LevelStats {
     pub unused_lawn_mowers: i32,
@@ -82,6 +83,13 @@ pub struct LawnApp {
     pub daisy_check: TypingCheck,
     pub sukhbir_check: TypingCheck,
     pub sukhbir_mode: bool,
+
+    // SDL2 / 窗口相关
+    pub screen_width: i32,
+    pub screen_height: i32,
+    pub mouse_x: i32,
+    pub mouse_y: i32,
+    pub is_down: bool,
 }
 
 impl LawnApp {
@@ -140,13 +148,23 @@ impl LawnApp {
             daisy_check: TypingCheck::new("daisies"),
             sukhbir_check: TypingCheck::new("sukhbir"),
             sukhbir_mode: false,
+
+            screen_width: 800,
+            screen_height: 600,
+            mouse_x: 0,
+            mouse_y: 0,
+            is_down: false,
         }
     }
 
+    pub fn set_screen_size(&mut self, w: i32, h: i32) {
+        self.screen_width = w;
+        self.screen_height = h;
+    }
+
     pub fn init(&mut self) {
-        // TODO: 初始化 SDL2, OpenGL, 加载资源
         self.game_scene = GameScenes::Menu;
-        log::info!("LawnApp initialized");
+        log::info!("LawnApp initialized (screen: {}x{})", self.screen_width, self.screen_height);
     }
 
     pub fn start(&mut self) {
@@ -254,7 +272,104 @@ impl LawnApp {
 
     pub fn shutdown(&mut self) {
         self.kill_board();
-        // TODO: 清理资源
         log::info!("LawnApp shutdown");
+    }
+
+    // ── 渲染 ──
+    pub fn draw(&mut self, g: &Graphics, canvas: &mut sdl2::render::Canvas<sdl2::video::Window>) {
+        match self.game_scene {
+            GameScenes::Menu => {
+                self.title_screen.draw(g, canvas);
+            }
+            GameScenes::Playing => {
+                if let Some(ref mut board) = self.board {
+                    board.draw(g, canvas);
+                }
+            }
+            _ => {}
+        }
+    }
+
+    // ── 输入事件处理 ──
+    pub fn key_down(&mut self, key: i32) {
+        // 检测作弊码
+        if self.tod_cheat_keys {
+            self.handle_cheat_code(key);
+        }
+        match self.game_scene {
+            GameScenes::Menu => {
+                self.title_screen.key_down(key);
+            }
+            GameScenes::Playing => {
+                if let Some(ref mut board) = self.board {
+                    board.key_down(key);
+                }
+            }
+            _ => {}
+        }
+    }
+
+    pub fn key_up(&mut self, key: i32) {
+        match self.game_scene {
+            GameScenes::Menu => {
+                self.title_screen.key_up(key);
+            }
+            GameScenes::Playing => {
+                if let Some(ref mut board) = self.board {
+                    board.key_up(key);
+                }
+            }
+            _ => {}
+        }
+    }
+
+    pub fn mouse_down(&mut self, x: i32, y: i32, clicks: i32) {
+        self.mouse_x = x;
+        self.mouse_y = y;
+        self.is_down = true;
+        match self.game_scene {
+            GameScenes::Menu => {
+                self.title_screen.mouse_down(x, y, clicks);
+            }
+            GameScenes::Playing => {
+                if let Some(ref mut board) = self.board {
+                    board.mouse_down(x, y, clicks);
+                }
+            }
+            _ => {}
+        }
+    }
+
+    pub fn mouse_up(&mut self, x: i32, y: i32, clicks: i32) {
+        self.mouse_x = x;
+        self.mouse_y = y;
+        self.is_down = false;
+        match self.game_scene {
+            GameScenes::Menu => {
+                self.title_screen.mouse_up(x, y, clicks);
+            }
+            GameScenes::Playing => {
+                if let Some(ref mut board) = self.board {
+                    board.mouse_up(x, y, clicks);
+                }
+            }
+            _ => {}
+        }
+    }
+
+    pub fn mouse_move(&mut self, x: i32, y: i32) {
+        self.mouse_x = x;
+        self.mouse_y = y;
+        match self.game_scene {
+            GameScenes::Menu => {
+                self.title_screen.mouse_move(x, y);
+            }
+            GameScenes::Playing => {
+                if let Some(ref mut board) = self.board {
+                    board.mouse_move(x, y);
+                }
+            }
+            _ => {}
+        }
     }
 }
