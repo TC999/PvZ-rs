@@ -7,7 +7,7 @@ description = "PvZ-Portable Rust rewrite - Plants vs Zombies game engine"
 [dependencies]
 # SDL2 binding - 对应 C++ 中的 SDL2 依赖 (SexyAppFramework)
 # ASSUMPTION: image/mixer/ttf features 暂时移除，等 vcpkg 编译完成后恢复
-sdl2 = { version = "0.37" }
+sdl2 = { version = "0.37", features = ["bundled", "static-link"] }
 
 # OpenGL 绑定 - 对应 C++ 中的 OpenGL/GLES 渲染
 gl = "0.14"
