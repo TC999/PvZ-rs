@@ -36,6 +36,7 @@ fn main() -> Result<(), String> {
     let mut app = LawnApp::new();
     app.set_screen_size(win_w as i32, win_h as i32);
     app.init();
+    app.start();
 
     // ── 事件泵 ──
     let mut event_pump = sdl_context
