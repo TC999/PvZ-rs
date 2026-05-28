@@ -1,10 +1,6 @@
 # SDL2 依赖配置
+# vcpkg 已编译 .lib/.dll 但未完成安装（pkgconfig 网络404）
 
 [env]
-SDL2DIR = "G:\\Game_src\\PvZ-rs\\vcpkg_installed\\vcpkg\\pkgs\\sdl2_x64-windows"
-LIB = "G:\\Game_src\\PvZ-rs\\vcpkg_installed\\vcpkg\\pkgs\\sdl2_x64-windows\\lib"
-
-[target.x86_64-pc-windows-msvc]
-rustflags = [
-    "-C", "link-arg=/LIBPATH:G:\\Game_src\\PvZ-rs\\vcpkg_installed\\vcpkg\\pkgs\\sdl2_x64-windows\\lib",
-]
+SDL2DIR = "vcpkg_installed\\vcpkg\\pkgs\\sdl2_x64-windows"
+LIB = "vcpkg_installed\\vcpkg\\pkgs\\sdl2_x64-windows\\lib"
