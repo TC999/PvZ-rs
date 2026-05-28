@@ -1,0 +1,10 @@
+# SDL2 依赖配置
+
+[env]
+SDL2DIR = "G:\\Game_src\\PvZ-rs\\vcpkg_installed\\vcpkg\\pkgs\\sdl2_x64-windows"
+LIB = "G:\\Game_src\\PvZ-rs\\vcpkg_installed\\vcpkg\\pkgs\\sdl2_x64-windows\\lib"
+
+[target.x86_64-pc-windows-msvc]
+rustflags = [
+    "-C", "link-arg=/LIBPATH:G:\\Game_src\\PvZ-rs\\vcpkg_installed\\vcpkg\\pkgs\\sdl2_x64-windows\\lib",
+]
