@@ -7,6 +7,11 @@ pub struct AlmanacDialog {
     pub scroll_offset: i32,
 }
 impl AlmanacDialog {
-    pub fn new() -> Self { Self { active: false, page: AlmanacPage::Index, selected_index: 0, scroll_offset: 0 } }
-    pub fn update(&mut self) {}
+    pub fn new() -> Self {
+        log::debug!("AlmanacDialog::new: 创建图鉴对话框");
+        Self { active: false, page: AlmanacPage::Index, selected_index: 0, scroll_offset: 0 }
+    }
+    pub fn update(&mut self) {
+        log::trace!("AlmanacDialog::update: 更新图鉴对话框，active={}", self.active);
+    }
 }

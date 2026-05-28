@@ -11,6 +11,7 @@ pub struct Image {
 
 impl Image {
     pub fn new(width: i32, height: i32) -> Self {
+        log::debug!("Image::new: 创建图像，尺寸 {}x{}", width, height);
         let size = (width * height * 4) as usize;
         Self {
             width,
@@ -20,7 +21,9 @@ impl Image {
     }
 
     pub fn get_pixel(&self, x: i32, y: i32) -> Option<(u8, u8, u8, u8)> {
+        log::trace!("Image::get_pixel: 获取像素 ({}, {})", x, y);
         if x < 0 || x >= self.width || y < 0 || y >= self.height {
+            log::trace!("Image::get_pixel: 像标超出范围");
             return None;
         }
         let idx = ((y * self.width + x) * 4) as usize;

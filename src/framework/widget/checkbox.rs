@@ -13,6 +13,7 @@ pub struct Checkbox {
 
 impl Checkbox {
     pub fn new(label: &str) -> Self {
+        log::debug!("Checkbox::new: 创建复选框，标签 {}", label);
         Self {
             widget: Widget::new(0, 0, 200, 30),
             label: label.to_string(),
@@ -21,8 +22,14 @@ impl Checkbox {
         }
     }
 
-    pub fn is_checked(&self) -> bool { self.checked }
-    pub fn set_checked(&mut self, checked: bool) { self.checked = checked; }
+    pub fn is_checked(&self) -> bool {
+        log::trace!("Checkbox::is_checked: 检查复选框状态 {}", self.checked);
+        self.checked
+    }
+    pub fn set_checked(&mut self, checked: bool) {
+        log::info!("Checkbox::set_checked: 设置复选框状态 {}", checked);
+        self.checked = checked;
+    }
 }
 
 impl WidgetLike for Checkbox {

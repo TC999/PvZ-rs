@@ -6,6 +6,11 @@ pub struct SeedChooserScreen {
     pub chosen_seeds: Vec<SeedType>,
 }
 impl SeedChooserScreen {
-    pub fn new() -> Self { Self { active: false, state: SeedChooserState::Normal, chosen_seeds: Vec::new() } }
-    pub fn update(&mut self) {}
+    pub fn new() -> Self {
+        log::debug!("SeedChooserScreen::new: 创建种子选择屏幕");
+        Self { active: false, state: SeedChooserState::Normal, chosen_seeds: Vec::new() }
+    }
+    pub fn update(&mut self) {
+        log::trace!("SeedChooserScreen::update: 更新种子选择屏幕，active={}", self.active);
+    }
 }

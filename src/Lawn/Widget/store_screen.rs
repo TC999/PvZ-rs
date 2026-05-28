@@ -7,6 +7,11 @@ pub struct StoreScreen {
     pub money: i32,
 }
 impl StoreScreen {
-    pub fn new() -> Self { Self { active: false, page: StorePages::SlotUpgrades, selected_item: StoreItem::PlantGatlingPea, money: 0 } }
-    pub fn update(&mut self) {}
+    pub fn new() -> Self {
+        log::debug!("StoreScreen::new: 创建商店屏幕");
+        Self { active: false, page: StorePages::SlotUpgrades, selected_item: StoreItem::PlantGatlingPea, money: 0 }
+    }
+    pub fn update(&mut self) {
+        log::trace!("StoreScreen::update: 更新商店屏幕，active={}", self.active);
+    }
 }

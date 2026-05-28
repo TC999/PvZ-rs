@@ -93,6 +93,7 @@ pub struct PakInterface {
 
 impl PakInterface {
     pub fn new() -> Self {
+        log::debug!("PakInterface::new: 创建 PAK 文件接口");
         Self {
             pak_collection_list: Vec::new(),
             pak_record_map: HashMap::new(),
@@ -101,11 +102,13 @@ impl PakInterface {
     }
 
     pub fn set_resource_folder(&mut self, folder: &str) {
+        log::info!("PakInterface::set_resource_folder: 设置资源文件夹 {}", folder);
         self.resource_folder = folder.to_string();
     }
 
     // Normalize path for pak lookup - matches C++ NormalizePakPath exactly
     pub fn normalize_pak_path(file_name: &str) -> String {
+        log::trace!("PakInterface::normalize_pak_path: 规范化路径 {}", file_name);
         let path = Path::new(file_name);
         let mut result = if path.is_absolute() || (file_name.len() > 1 && file_name.as_bytes()[1] == b':') {
             // ASSUMPTION: C++ uses filesystem::path to normalize and make relative to resource folder.
@@ -121,13 +124,19 @@ impl PakInterface {
         }
 
         // C++ converts to uppercase for case-insensitive matching
-        result.to_uppercase()
+        let normalized = result.to_uppercase();
+        log::trace!("PakInterface::normalize_pak_path: 结果 {}", normalized);
+        normalized
     }
 
     pub fn add_pak_file(&mut self, file_name: &str) -> bool {
+        log::info!("PakInterface::add_pak_file: 添加 PAK 文件 {}", file_name);
         let mut file = match File::open(file_name) {
             Ok(f) => f,
-            Err(_) => return false,
+            Err(e) => {
+                log::error!("PakInterface::add_pak_file: 文件 {} 打开失败: {}", file_name, e);
+                return false;
+            }
         };
 
         let file_size = match file.metadata() {
@@ -187,13 +196,17 @@ impl PakInterface {
 
         // Read magic
         let magic = self.read_u32_le_internal(&mut pfile);
+        log::debug!("PakInterface::add_pak_file: PAK 魔术数字 0x{:08X}，期望 0x{:08X}", magic, PAK_MAGIC);
         if magic != PAK_MAGIC {
+            log::error!("PakInterface::add_pak_file: PAK 文件 {} 魔术数字不匹配", file_name);
             return false;
         }
 
         // Read version
         let version = self.read_u32_le_internal(&mut pfile);
+        log::debug!("PakInterface::add_pak_file: PAK 版本 {}", version);
         if version > 0 {
+            log::error!("PakInterface::add_pak_file: PAK 文件 {} 版本不支持: {}", file_name, version);
             return false;
         }
 
@@ -321,12 +334,15 @@ impl PakInterface {
     // ─── Public API matching C++ PakInterfaceBase ───
 
     pub fn f_open(&mut self, file_name: &str, access: &str) -> *mut PFile {
+        log::info!("PakInterface::f_open: 打开文件 {}，模式 {}", file_name, access);
         let access_lower = access.to_lowercase();
 
         if access_lower.contains('r') {
             let key = Self::normalize_pak_path(file_name);
+            log::trace!("PakInterface::f_open: 在 PAK 中查找 {}", key);
 
             if let Some(record) = self.pak_record_map.get_mut(&key) {
+                log::info!("PakInterface::f_open: 在 PAK 中找到文件 {}", file_name);
                 let mut pfile = Box::new(PFile::new());
                 pfile.record = record as *mut PakRecord;
                 pfile.pos = 0;
@@ -342,15 +358,20 @@ impl PakInterface {
             file_name.to_string()
         };
 
+        log::trace!("PakInterface::f_open: 尝试从文件系统打开 {}", file_path);
         match File::open(&file_path) {
             Ok(file) => {
+                log::info!("PakInterface::f_open: 文件 {} 从文件系统打开成功", file_name);
                 let mut pfile = Box::new(PFile::new());
                 pfile.record = ptr::null_mut();
                 pfile.pos = 0;
                 pfile.fp = Some(file);
                 Box::into_raw(pfile)
             }
-            Err(_) => ptr::null_mut(),
+            Err(e) => {
+                log::warn!("PakInterface::f_open: 文件 {} 打开失败: {}", file_name, e);
+                ptr::null_mut()
+            }
         }
     }
 
@@ -422,7 +443,9 @@ impl PakInterface {
     }
 
     pub fn f_read(&self, ptr: *mut std::ffi::c_void, elem_size: i32, count: i32, file: *mut PFile) -> i32 {
+        log::trace!("PakInterface::f_read: 读取数据，元素大小 {}，数量 {}", elem_size, count);
         if file.is_null() {
+            log::warn!("PakInterface::f_read: 文件指针为空");
             return 0;
         }
         // SAFETY: file is a valid pointer
@@ -432,9 +455,11 @@ impl PakInterface {
             let rec = unsafe { &*pfile.record };
             let size_bytes = std::cmp::min(elem_size * count, rec.size - pfile.pos) as usize;
             if size_bytes == 0 {
+                log::trace!("PakInterface::f_read: 没有数据可读");
                 return 0;
             }
 
+            log::trace!("PakInterface::f_read: 从 PAK 读取 {} 字节", size_bytes);
             // SAFETY: collection and data_ptr validity
             let pak_data = unsafe {
                 slice::from_raw_parts(
@@ -456,6 +481,7 @@ impl PakInterface {
             (size_bytes / elem_size.max(1) as usize) as i32
         } else if let Some(ref mut fp) = pfile.fp {
             let size = (elem_size * count) as usize;
+            log::trace!("PakInterface::f_read: 从文件系统读取 {} 字节", size);
             let mut buf = vec![0u8; size];
             match fp.read_exact(&mut buf) {
                 Ok(_) => {
@@ -466,13 +492,15 @@ impl PakInterface {
                     }
                     count
                 }
-                Err(_) => {
+                Err(e) => {
+                    log::error!("PakInterface::f_read: 文件读取失败: {}", e);
                     // Partial read fallback: return elements read
                     // FIXME: exact bytes-read tracking not implemented for file path
                     0
                 }
             }
         } else {
+            log::warn!("PakInterface::f_read: 无效的文件句柄");
             0
         }
     }
@@ -620,6 +648,8 @@ impl PakInterface {
     // Helper: check if a path exists in pak records
     pub fn has_file(&self, path: &str) -> bool {
         let key = Self::normalize_pak_path(path);
-        self.pak_record_map.contains_key(&key)
+        let result = self.pak_record_map.contains_key(&key);
+        log::trace!("PakInterface::has_file: 检查文件 {}，结果 {}", path, result);
+        result
     }
 }

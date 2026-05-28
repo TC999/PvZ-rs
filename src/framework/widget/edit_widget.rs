@@ -15,6 +15,7 @@ pub struct EditWidget {
 
 impl EditWidget {
     pub fn new(max_chars: usize) -> Self {
+        log::debug!("EditWidget::new: 创建编辑控件，最大字符数 {}", max_chars);
         Self {
             widget: Widget::new(0, 0, 200, 30),
             text: String::new(),
@@ -25,8 +26,14 @@ impl EditWidget {
         }
     }
 
-    pub fn get_text(&self) -> &str { &self.text }
-    pub fn set_text(&mut self, text: &str) { self.text = text.to_string(); }
+    pub fn get_text(&self) -> &str {
+        log::trace!("EditWidget::get_text: 获取文本 '{}'", self.text);
+        &self.text
+    }
+    pub fn set_text(&mut self, text: &str) {
+        log::debug!("EditWidget::set_text: 设置文本 '{}'", text);
+        self.text = text.to_string();
+    }
 }
 
 impl WidgetLike for EditWidget {

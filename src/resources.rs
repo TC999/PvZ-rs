@@ -41,6 +41,7 @@ pub struct Resources {
 
 impl Resources {
     pub fn new() -> Self {
+        log::debug!("Resources::new: 创建资源管理器");
         Self {
             string_file: TodStringFile::new(),
             loaded: false,
@@ -48,12 +49,15 @@ impl Resources {
     }
 
     pub fn load_resources(&mut self) {
+        log::info!("Resources::load_resources: 加载资源文件");
         // TODO: 加载资源文件
         self.string_file.load_file("resources/strings.txt");
         self.loaded = true;
+        log::info!("Resources::load_resources: 资源文件加载完成");
     }
 
     pub fn get_string(&self, key: &str) -> Option<&str> {
+        log::trace!("Resources::get_string: 获取字符串 {}", key);
         self.string_file.get(key)
     }
 }

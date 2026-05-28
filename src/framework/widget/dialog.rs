@@ -18,6 +18,7 @@ pub struct Dialog {
 
 impl Dialog {
     pub fn new(title: &str) -> Self {
+        log::debug!("Dialog::new: 创建对话框，标题 {}", title);
         Self {
             widget: Widget::new(0, 0, 400, 300),
             title: title.to_string(),
@@ -31,15 +32,18 @@ impl Dialog {
     }
 
     pub fn set_centered(&mut self, screen_width: i32, screen_height: i32) {
+        log::trace!("Dialog::set_centered: 设置对话框居中，屏幕尺寸 {}x{}", screen_width, screen_height);
         self.widget.x = (screen_width - self.widget.width) / 2;
         self.widget.y = (screen_height - self.widget.height) / 2;
     }
 
     pub fn get_result(&self) -> i32 {
+        log::trace!("Dialog::get_result: 获取对话框结果 {}", self.result);
         self.result
     }
 
     pub fn close(&mut self) {
+        log::info!("Dialog::close: 关闭对话框");
         self.is_closing = true;
     }
 }

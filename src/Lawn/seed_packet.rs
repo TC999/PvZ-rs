@@ -17,6 +17,7 @@ pub struct SeedPacket {
 
 impl SeedPacket {
     pub fn new(seed_type: SeedType) -> Self {
+        log::info!("SeedPacket::new: 创建种子包，类型 {:?}", seed_type);
         Self {
             seed_type,
             x: 0,
@@ -32,6 +33,7 @@ impl SeedPacket {
     }
 
     pub fn update(&mut self) {
+        log::trace!("SeedPacket::update: 更新种子包，类型 {:?}，冷却 {}", self.seed_type, self.cooldown);
         if self.cooldown > 0 {
             self.cooldown -= 1;
         }

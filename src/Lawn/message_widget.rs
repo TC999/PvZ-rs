@@ -17,6 +17,7 @@ pub struct MessageWidget {
 
 impl MessageWidget {
     pub fn new() -> Self {
+        log::debug!("MessageWidget::new: 创建消息控件");
         Self {
             text: String::new(),
             message_style: MessageStyle::Off,
@@ -32,6 +33,7 @@ impl MessageWidget {
     }
 
     pub fn show_message(&mut self, text: &str, style: MessageStyle) {
+        log::info!("MessageWidget::show_message: 显示消息 '{}'，样式 {:?}", text, style);
         self.text = text.to_string();
         self.message_style = style;
         self.visible = true;
@@ -40,9 +42,14 @@ impl MessageWidget {
     }
 
     pub fn update(&mut self) {
-        if !self.visible { return; }
+        log::trace!("MessageWidget::update: 更新消息控件，可见 {}，已用时间 {}", self.visible, self.elapsed);
+        if !self.visible {
+            log::trace!("MessageWidget::update: 消息控件不可见，跳过更新");
+            return;
+        }
         self.elapsed += 1;
         if self.elapsed >= self.duration {
+            log::info!("MessageWidget::update: 消息持续时间结束，隐藏消息");
             self.visible = false;
         }
     }

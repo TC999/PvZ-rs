@@ -5,12 +5,20 @@ use pvz_portable::LawnApp;
 use pvz_portable::framework::graphics::graphics::Graphics;
 
 fn main() -> Result<(), String> {
-    env_logger::init();
-    log::info!("PvZ-Portable starting up...");
+    env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("info")).init();
+    log::info!("程序启动: PvZ-Portable starting up...");
 
     // ── SDL2 初始化 ──
-    let sdl_context = sdl2::init().map_err(|e| format!("SDL2 init failed: {}", e))?;
-    let video_subsystem = sdl_context.video().map_err(|e| format!("SDL2 video init failed: {}", e))?;
+    let sdl_context = sdl2::init().map_err(|e| {
+        log::error!("SDL2 init failed: {}", e);
+        format!("SDL2 init failed: {}", e)
+    })?;
+    log::info!("SDL2 初始化成功");
+    let video_subsystem = sdl_context.video().map_err(|e| {
+        log::error!("SDL2 video init failed: {}", e);
+        format!("SDL2 video init failed: {}", e)
+    })?;
+    log::info!("SDL2 video 子系统初始化成功");
 
     // ── 创建窗口 ──
     let window = video_subsystem
@@ -18,7 +26,11 @@ fn main() -> Result<(), String> {
         .position_centered()
         .resizable()
         .build()
-        .map_err(|e| format!("Window creation failed: {}", e))?;
+        .map_err(|e| {
+            log::error!("Window creation failed: {}", e);
+            format!("Window creation failed: {}", e)
+        })?;
+    log::info!("窗口创建成功: 800x600");
 
     // ── 创建 SDL2 渲染器 (对应 C++ 中的 GLInterface / 软件渲染) ──
     let mut canvas = window
@@ -26,7 +38,11 @@ fn main() -> Result<(), String> {
         .accelerated()
         .present_vsync()
         .build()
-        .map_err(|e| format!("Canvas creation failed: {}", e))?;
+        .map_err(|e| {
+            log::error!("Canvas creation failed: {}", e);
+            format!("Canvas creation failed: {}", e)
+        })?;
+    log::info!("SDL2 渲染器创建成功");
 
     // ── 创建绘图上下文 ──
     // sdl_canvas raw pointer reserved for future FFI use
@@ -41,7 +57,11 @@ fn main() -> Result<(), String> {
     // ── 事件泵 ──
     let mut event_pump = sdl_context
         .event_pump()
-        .map_err(|e| format!("Event pump creation failed: {}", e))?;
+        .map_err(|e| {
+            log::error!("Event pump creation failed: {}", e);
+            format!("Event pump creation failed: {}", e)
+        })?;
+    log::info!("事件泵创建成功");
 
     let frame_duration = std::time::Duration::from_millis(16);
 
@@ -125,6 +145,6 @@ fn main() -> Result<(), String> {
     }
 
     app.shutdown();
-    log::info!("PvZ-Portable shutting down.");
+    log::info!("程序退出: PvZ-Portable shutting down.");
     Ok(())
 }

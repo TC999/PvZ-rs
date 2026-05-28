@@ -20,6 +20,7 @@ pub struct Board {
 
 impl Board {
     pub fn new() -> Self {
+        log::info!("Board::new: 创建新的游戏板");
         Self {
             board_result: BoardResult::None,
             game_mode: GameMode::Adventure,
@@ -35,20 +36,33 @@ impl Board {
     }
 
     pub fn update(&mut self) {
+        log::trace!("Board::update: 更新游戏板");
         // TODO: 实现游戏主循环更新逻辑
     }
 
     pub fn draw(&self, _g: &Graphics, _canvas: &mut Canvas<Window>) {
+        log::trace!("Board::draw: 绘制游戏板");
         // TODO: 实现游戏绘制逻辑
     }
 
     pub fn reset(&mut self) {
+        log::info!("Board::reset: 重置游戏板");
         self.board_result = BoardResult::None;
     }
 
-    pub fn key_down(&mut self, _key: i32) {}
-    pub fn key_up(&mut self, _key: i32) {}
-    pub fn mouse_down(&mut self, _x: i32, _y: i32, _clicks: i32) {}
-    pub fn mouse_up(&mut self, _x: i32, _y: i32, _clicks: i32) {}
-    pub fn mouse_move(&mut self, _x: i32, _y: i32) {}
+    pub fn key_down(&mut self, key: i32) {
+        log::debug!("Board::key_down: 按键按下 {}", key);
+    }
+    pub fn key_up(&mut self, key: i32) {
+        log::debug!("Board::key_up: 按键释放 {}", key);
+    }
+    pub fn mouse_down(&mut self, x: i32, y: i32, clicks: i32) {
+        log::debug!("Board::mouse_down: 鼠标按下 ({}, {}), 点击次数 {}", x, y, clicks);
+    }
+    pub fn mouse_up(&mut self, x: i32, y: i32, clicks: i32) {
+        log::debug!("Board::mouse_up: 鼠标释放 ({}, {}), 点击次数 {}", x, y, clicks);
+    }
+    pub fn mouse_move(&mut self, x: i32, y: i32) {
+        log::trace!("Board::mouse_move: 鼠标移动 ({}, {})", x, y);
+    }
 }

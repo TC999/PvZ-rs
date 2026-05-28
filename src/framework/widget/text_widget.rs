@@ -15,6 +15,7 @@ pub struct TextWidget {
 
 impl TextWidget {
     pub fn new(text: &str) -> Self {
+        log::debug!("TextWidget::new: 创建文本控件，文本 '{}'", text);
         Self {
             widget: Widget::new(0, 0, 200, 20),
             text: text.to_string(),
@@ -24,8 +25,14 @@ impl TextWidget {
         }
     }
 
-    pub fn set_text(&mut self, text: &str) { self.text = text.to_string(); }
-    pub fn get_text(&self) -> &str { &self.text }
+    pub fn set_text(&mut self, text: &str) {
+        log::debug!("TextWidget::set_text: 设置文本 '{}'", text);
+        self.text = text.to_string();
+    }
+    pub fn get_text(&self) -> &str {
+        log::trace!("TextWidget::get_text: 获取文本 '{}'", self.text);
+        &self.text
+    }
 }
 
 impl WidgetLike for TextWidget {

@@ -18,6 +18,7 @@ pub struct GameObject {
 
 impl GameObject {
     pub fn new(object_type: GameObjectType) -> Self {
+        log::debug!("GameObject::new: 创建游戏对象，类型 {:?}", object_type);
         Self {
             object_type,
             x: 0,
@@ -34,10 +35,12 @@ impl GameObject {
     }
 
     pub fn update(&mut self) {
+        log::trace!("GameObject::update: 更新游戏对象，类型 {:?}", self.object_type);
         // 基类更新
     }
 
     pub fn draw(&self) {
+        log::trace!("GameObject::draw: 绘制游戏对象，类型 {:?}", self.object_type);
         // 基类绘制
     }
 }

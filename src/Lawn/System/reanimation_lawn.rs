@@ -11,6 +11,7 @@ pub struct ReanimationLawn {
 
 impl ReanimationLawn {
     pub fn new(reanim_type: ReanimationType) -> Self {
+        log::info!("ReanimationLawn::new: 创建草坪动画，类型 {:?}", reanim_type);
         Self {
             reanim: Reanimation::new(reanim_type),
             lawn_specific_data: 0,
@@ -18,10 +19,12 @@ impl ReanimationLawn {
     }
 
     pub fn update(&mut self) {
+        log::trace!("ReanimationLawn::update: 更新草坪动画");
         self.reanim.update();
     }
 
     pub fn draw(&self) {
+        log::trace!("ReanimationLawn::draw: 绘制草坪动画");
         self.reanim.draw();
     }
 }

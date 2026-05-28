@@ -19,6 +19,7 @@ pub struct PlayerInfo {
 
 impl PlayerInfo {
     pub fn new(name: &str) -> Self {
+        log::info!("PlayerInfo::new: 创建玩家信息，名称 {}", name);
         Self {
             name: name.to_string(),
             coins: 0,
@@ -37,22 +38,30 @@ impl PlayerInfo {
     }
 
     pub fn add_coins(&mut self, amount: i32) {
+        log::info!("PlayerInfo::add_coins: 添加 {} 金币，当前 {}", amount, self.coins);
         self.coins += amount;
     }
 
     pub fn complete_level(&mut self, level: i32) {
+        log::info!("PlayerInfo::complete_level: 完成关卡 {}", level);
         if level >= 1 && level <= 50 {
             self.level_completed[(level - 1) as usize] = true;
             if level > self.current_level {
+                log::info!("PlayerInfo::complete_level: 当前关卡更新为 {}", level);
                 self.current_level = level;
             }
+        } else {
+            log::warn!("PlayerInfo::complete_level: 关卡 {} 超出范围", level);
         }
     }
 
     pub fn is_level_completed(&self, level: i32) -> bool {
         if level >= 1 && level <= 50 {
-            self.level_completed[(level - 1) as usize]
+            let result = self.level_completed[(level - 1) as usize];
+            log::trace!("PlayerInfo::is_level_completed: 关卡 {} 完成状态 {}", level, result);
+            result
         } else {
+            log::warn!("PlayerInfo::is_level_completed: 关卡 {} 超出范围", level);
             false
         }
     }

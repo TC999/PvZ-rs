@@ -17,6 +17,7 @@ pub struct Coin {
 
 impl Coin {
     pub fn new(coin_type: CoinType, x: i32, y: i32) -> Self {
+        log::info!("Coin::new: 创建金币，类型 {:?}，位置 ({}, {})", coin_type, x, y);
         Self {
             coin_type,
             coin_motion: CoinMotion::Coin,
@@ -32,11 +33,16 @@ impl Coin {
     }
 
     pub fn update(&mut self) {
-        if !self.active { return; }
+        log::trace!("Coin::update: 更新金币，类型 {:?}，位置 ({}, {})", self.coin_type, self.x, self.y);
+        if !self.active {
+            log::trace!("Coin::update: 金币未激活，跳过更新");
+            return;
+        }
         self.x = (self.x as f32 + self.vel_x) as i32;
         self.y = (self.y as f32 + self.vel_y) as i32;
         self.life -= 1;
         if self.life <= 0 {
+            log::info!("Coin::update: 金币生命结束，设置为已收集");
             self.collected = true;
         }
     }

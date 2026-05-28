@@ -15,6 +15,7 @@ pub struct Slider {
 
 impl Slider {
     pub fn new(horizontal: bool) -> Self {
+        log::debug!("Slider::new: 创建滑块，水平={}", horizontal);
         Self {
             widget: Widget::new(0, 0, 100, 20),
             value: 0,
@@ -25,8 +26,12 @@ impl Slider {
         }
     }
 
-    pub fn get_value(&self) -> i32 { self.value }
+    pub fn get_value(&self) -> i32 {
+        log::trace!("Slider::get_value: 获取值 {}", self.value);
+        self.value
+    }
     pub fn set_value(&mut self, val: i32) {
+        log::debug!("Slider::set_value: 设置值 {}", val);
         self.value = val.clamp(self.min_val, self.max_val);
     }
 }

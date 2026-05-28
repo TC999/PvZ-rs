@@ -52,6 +52,7 @@ pub struct Reanimation {
 
 impl Reanimation {
     pub fn new(reanim_type: ReanimationType) -> Self {
+        log::info!("Reanimation::new: 创建动画，类型 {:?}", reanim_type);
         Self {
             reanim_type,
             x: 0.0,
@@ -72,16 +73,22 @@ impl Reanimation {
     }
 
     pub fn update(&mut self) {
+        log::trace!("Reanimation::update: 更新动画，类型 {:?}，帧 {}", self.reanim_type, self.current_frame);
         // TODO: 实现动画帧更新
-        if self.dead { return; }
+        if self.dead {
+            log::trace!("Reanimation::update: 动画已死亡，跳过更新");
+            return;
+        }
         self.elapsed_time += self.anim_rate;
     }
 
     pub fn draw(&self) {
+        log::trace!("Reanimation::draw: 绘制动画，类型 {:?}，帧 {}", self.reanim_type, self.current_frame);
         // TODO: 实现动画绘制
     }
 
     pub fn is_dead(&self) -> bool {
+        log::trace!("Reanimation::is_dead: 动画状态 dead={}", self.dead);
         self.dead
     }
 }
@@ -93,6 +100,7 @@ pub struct ReanimatorCache {
 
 impl ReanimatorCache {
     pub fn new() -> Self {
+        log::debug!("ReanimatorCache::new: 创建动画缓存");
         Self {
             animations: Vec::new(),
         }

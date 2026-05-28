@@ -12,6 +12,7 @@ pub struct ToolTipWidget {
 
 impl ToolTipWidget {
     pub fn new() -> Self {
+        log::debug!("ToolTipWidget::new: 创建工具提示控件");
         Self {
             text: String::new(),
             title: String::new(),
@@ -24,13 +25,21 @@ impl ToolTipWidget {
     }
 
     pub fn set_text(&mut self, text: &str) {
+        log::trace!("ToolTipWidget::set_text: 设置工具提示文本 {}", text);
         self.text = text.to_string();
     }
 
     pub fn set_title(&mut self, title: &str) {
+        log::trace!("ToolTipWidget::set_title: 设置工具提示标题 {}", title);
         self.title = title.to_string();
     }
 
-    pub fn show(&mut self) { self.visible = true; }
-    pub fn hide(&mut self) { self.visible = false; }
+    pub fn show(&mut self) {
+        log::trace!("ToolTipWidget::show: 显示工具提示");
+        self.visible = true;
+    }
+    pub fn hide(&mut self) {
+        log::trace!("ToolTipWidget::hide: 隐藏工具提示");
+        self.visible = false;
+    }
 }

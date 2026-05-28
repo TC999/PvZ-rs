@@ -7,6 +7,11 @@ pub struct NewOptionsDialog {
     pub hardware_acceleration: bool,
 }
 impl NewOptionsDialog {
-    pub fn new() -> Self { Self { active:false, music_volume:1.0, sfx_volume:1.0, fullscreen:true, hardware_acceleration:true } }
-    pub fn update(&mut self) {}
+    pub fn new() -> Self {
+        log::debug!("NewOptionsDialog::new: 创建新选项对话框");
+        Self { active:false, music_volume:1.0, sfx_volume:1.0, fullscreen:true, hardware_acceleration:true }
+    }
+    pub fn update(&mut self) {
+        log::trace!("NewOptionsDialog::update: 更新新选项对话框，active={}", self.active);
+    }
 }

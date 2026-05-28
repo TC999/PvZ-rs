@@ -21,6 +21,7 @@ pub struct Projectile {
 
 impl Projectile {
     pub fn new(projectile_type: ProjectileType, row: i32) -> Self {
+        log::info!("Projectile::new: 创建投射物，类型 {:?}，行 {}", projectile_type, row);
         Self {
             projectile_type,
             motion: ProjectileMotion::Straight,
@@ -40,12 +41,17 @@ impl Projectile {
     }
 
     pub fn update(&mut self) {
-        if !self.active { return; }
+        log::trace!("Projectile::update: 更新投射物，类型 {:?}，位置 ({}, {})", self.projectile_type, self.x, self.y);
+        if !self.active {
+            log::trace!("Projectile::update: 投射物未激活，跳过更新");
+            return;
+        }
         self.x += self.vel_x;
         self.y += self.vel_y;
         self.anim_counter += 1;
         // 离开屏幕则标记死亡
         if self.x > 850.0 || self.x < -50.0 || self.y > 650.0 || self.y < -50.0 {
+            log::info!("Projectile::update: 投射物离开屏幕，标记为死亡");
             self.dead = true;
         }
     }

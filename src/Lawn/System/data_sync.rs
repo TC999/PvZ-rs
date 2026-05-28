@@ -9,6 +9,7 @@ pub struct DataSync {
 
 impl DataSync {
     pub fn new() -> Self {
+        log::debug!("DataSync::new: 创建数据同步");
         Self {
             sync_enabled: false,
             last_sync_time: 0,
@@ -17,6 +18,7 @@ impl DataSync {
     }
 
     pub fn update(&mut self) {
+        log::trace!("DataSync::update: 更新数据同步，启用 {}", self.sync_enabled);
         // TODO: 实现数据同步
     }
 }

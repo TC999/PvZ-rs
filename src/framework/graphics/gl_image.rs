@@ -17,10 +17,12 @@ pub struct GLImage {
 
 impl GLImage {
     pub fn new() -> Self {
+        log::debug!("GLImage::new: 创建 OpenGL 纹理图像");
         Self { image: None, texture_id: 0, width: 0, height: 0 }
     }
 
     pub fn set_image(&mut self, img: Image) {
+        log::info!("GLImage::set_image: 设置图像，尺寸 {}x{}", img.width, img.height);
         self.width = img.width;
         self.height = img.height;
         self.image = Some(img);

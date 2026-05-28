@@ -15,6 +15,7 @@ pub struct ListWidget {
 
 impl ListWidget {
     pub fn new() -> Self {
+        log::debug!("ListWidget::new: 创建列表控件");
         Self {
             widget: Widget::new(0, 0, 200, 200),
             items: Vec::new(),
@@ -26,15 +27,18 @@ impl ListWidget {
     }
 
     pub fn add_item(&mut self, item: &str) {
+        log::debug!("ListWidget::add_item: 添加项目 '{}'", item);
         self.items.push(item.to_string());
     }
 
     pub fn clear(&mut self) {
+        log::info!("ListWidget::clear: 清空列表");
         self.items.clear();
         self.selected_index = -1;
     }
 
     pub fn get_selected(&self) -> Option<&str> {
+        log::trace!("ListWidget::get_selected: 获取选中项，索引 {}", self.selected_index);
         if self.selected_index >= 0 && (self.selected_index as usize) < self.items.len() {
             Some(&self.items[self.selected_index as usize])
         } else {

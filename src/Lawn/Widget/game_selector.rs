@@ -5,6 +5,11 @@ pub struct GameSelector {
     pub selected_level: i32,
 }
 impl GameSelector {
-    pub fn new() -> Self { Self { active: false, selected_page: 0, selected_level: 0 } }
-    pub fn update(&mut self) {}
+    pub fn new() -> Self {
+        log::debug!("GameSelector::new: 创建游戏选择器");
+        Self { active: false, selected_page: 0, selected_level: 0 }
+    }
+    pub fn update(&mut self) {
+        log::trace!("GameSelector::update: 更新游戏选择器，active={}", self.active);
+    }
 }

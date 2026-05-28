@@ -5,6 +5,11 @@ pub struct NewUserDialog {
     pub result: i32,
 }
 impl NewUserDialog {
-    pub fn new() -> Self { Self { active: false, username: String::new(), result: 0 } }
-    pub fn update(&mut self) {}
+    pub fn new() -> Self {
+        log::debug!("NewUserDialog::new: 创建新用户对话框");
+        Self { active: false, username: String::new(), result: 0 }
+    }
+    pub fn update(&mut self) {
+        log::trace!("NewUserDialog::update: 更新新用户对话框，active={}", self.active);
+    }
 }

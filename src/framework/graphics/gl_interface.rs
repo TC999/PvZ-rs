@@ -11,10 +11,12 @@ pub struct GLInterface {
 
 impl GLInterface {
     pub fn new() -> Self {
+        log::debug!("GLInterface::new: 创建 OpenGL 接口");
         Self { initialized: false }
     }
 
     pub fn init(&mut self) -> bool {
+        log::info!("GLInterface::init: 初始化 OpenGL 接口");
         self.initialized = true;
         true
     }

@@ -12,6 +12,7 @@ pub struct ScrollbuttonWidget {
 
 impl ScrollbuttonWidget {
     pub fn new(is_up: bool) -> Self {
+        log::debug!("ScrollbuttonWidget::new: 创建滚动按钮，向上={}", is_up);
         Self {
             widget: Widget::new(0, 0, 16, 16),
             is_up,

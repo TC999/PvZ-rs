@@ -22,6 +22,7 @@ pub struct ImageFont {
 
 impl ImageFont {
     pub fn new() -> Self {
+        log::debug!("ImageFont::new: 创建图像字体");
         Self {
             char_data: Vec::new(),
             char_pos: Vec::new(),
@@ -30,7 +31,8 @@ impl ImageFont {
         }
     }
 
-    pub fn string_width(&self, _text: &str) -> i32 {
+    pub fn string_width(&self, text: &str) -> i32 {
+        log::trace!("ImageFont::string_width: 计算字符串 '{}' 的宽度", text);
         // FIXME: Actual CharData-based width calculation
         0
     }

@@ -15,6 +15,7 @@ pub struct ScrollbarWidget {
 
 impl ScrollbarWidget {
     pub fn new(horizontal: bool) -> Self {
+        log::debug!("ScrollbarWidget::new: 创建滚动条，水平={}", horizontal);
         Self {
             widget: Widget::new(0, 0, if horizontal { 100 } else { 16 }, if horizontal { 16 } else { 100 }),
             value: 0,
@@ -25,8 +26,14 @@ impl ScrollbarWidget {
         }
     }
 
-    pub fn set_max(&mut self, max: i32) { self.max_value = max; }
-    pub fn set_value(&mut self, val: i32) { self.value = val.clamp(0, self.max_value); }
+    pub fn set_max(&mut self, max: i32) {
+        log::trace!("ScrollbarWidget::set_max: 设置最大值 {}", max);
+        self.max_value = max;
+    }
+    pub fn set_value(&mut self, val: i32) {
+        log::trace!("ScrollbarWidget::set_value: 设置值 {}", val);
+        self.value = val.clamp(0, self.max_value);
+    }
 }
 
 impl WidgetLike for ScrollbarWidget {

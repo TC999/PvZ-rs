@@ -199,6 +199,7 @@ pub struct SexyAppBase {
 
 impl SexyAppBase {
     pub fn new() -> Self {
+        log::info!("SexyAppBase::new: 创建应用程序框架基类实例");
         Self {
             m_title: String::new(),
             m_prod_name: String::new(),
@@ -305,11 +306,14 @@ impl SexyAppBase {
 
     /// 初始化应用 (对应 C++ SexyAppBase::Init)
     pub fn init(&mut self) {
+        log::info!("SexyAppBase::init: 初始化应用程序框架");
         // 设置随机种子
         let seed = Instant::now().elapsed().as_nanos() as u64;
+        log::debug!("SexyAppBase::init: 设置随机种子 {}", seed);
         self.m_rand = MTRand::with_seed(seed);
 
         // 初始化 WidgetManager
+        log::debug!("SexyAppBase::init: 初始化 WidgetManager");
         let mut wm = WidgetManager::new();
         wm.width = self.m_width;
         wm.height = self.m_height;
@@ -318,20 +322,25 @@ impl SexyAppBase {
 
         // 设置资源目录
         self.set_resource_folder("");
+        log::debug!("SexyAppBase::init: 设置资源目录为空");
 
         // 设置应用数据目录
         self.set_app_data_folder("userdata");
+        log::debug!("SexyAppBase::init: 设置应用数据目录为 userdata");
 
         self.m_loaded = true;
+        log::info!("SexyAppBase::init: 应用程序框架初始化完成");
     }
 
     /// 开始运行 (对应 C++ SexyAppBase::Start)
     pub fn start(&mut self) {
+        log::info!("SexyAppBase::start: 启动应用程序");
         self.m_shutdown = false;
     }
 
     /// 更新帧 (对应 C++ SexyAppBase::UpdateFrames)
     pub fn update_frames(&mut self) {
+        log::trace!("SexyAppBase::update_frames: 更新帧计数 {}", self.m_update_count);
         // 更新帧计数
         self.m_update_count += 1;
 
@@ -342,6 +351,7 @@ impl SexyAppBase {
         self.m_fps_total_time += 0.016; // ~60 FPS
         self.m_fps_count += 1;
         if self.m_fps_total_time >= 1.0 {
+            log::trace!("SexyAppBase::update_frames: FPS 更新为 {}", self.m_fps_count);
             self.m_fps = self.m_fps_count;
             self.m_fps_count = 0;
             self.m_fps_total_time = 0.0;
@@ -353,7 +363,9 @@ impl SexyAppBase {
 
     /// 主循环更新 (对应 C++ SexyAppBase::Update)
     pub fn update(&mut self) {
+        log::trace!("SexyAppBase::update: 开始更新，shutdown={}", self.m_shutdown);
         if self.m_shutdown {
+            log::trace!("SexyAppBase::update: 应用已关闭，跳过更新");
             return;
         }
 
@@ -362,6 +374,7 @@ impl SexyAppBase {
 
         // 更新 WidgetManager
         if let Some(ref mut wm) = self.m_widget_manager {
+            log::trace!("SexyAppBase::update: 更新 WidgetManager");
             wm.update();
         }
 
@@ -374,15 +387,18 @@ impl SexyAppBase {
         self.m_in_update = false;
 
         self.process_safe_delete_list();
+        log::trace!("SexyAppBase::update: 更新完成");
     }
 
     /// 关闭 (对应 C++ SexyAppBase::Shutdown)
     pub fn shutdown(&mut self) {
+        log::info!("SexyAppBase::shutdown: 关闭应用程序");
         self.m_shutdown = true;
     }
 
     /// 退出 (对应 C++ SexyAppBase::DoExit)
     pub fn do_exit(&mut self, code: i32) {
+        log::info!("SexyAppBase::do_exit: 退出应用程序，退出码 {}", code);
         self.m_exit_code = code;
         self.m_shutdown = true;
     }
@@ -421,17 +437,21 @@ impl SexyAppBase {
 
     /// 添加对话框 (对应 C++ SexyAppBase::AddDialog)
     pub fn add_dialog(&mut self, dialog_id: i32, widget_index: i32) {
+        log::info!("SexyAppBase::add_dialog: 添加对话框，ID {}，控件索引 {}", dialog_id, widget_index);
         self.m_dialog_map.insert(dialog_id, widget_index);
         self.m_dialog_list.push(widget_index);
     }
 
     /// 对话框是否激活 (对应 C++ SexyAppBase::IsDialogActive)
     pub fn is_dialog_active(&self, dialog_id: i32) -> bool {
-        self.m_dialog_map.contains_key(&dialog_id)
+        let result = self.m_dialog_map.contains_key(&dialog_id);
+        log::trace!("SexyAppBase::is_dialog_active: 检查对话框 {} 是否激活，结果 {}", dialog_id, result);
+        result
     }
 
     /// 关闭对话框 (对应 C++ SexyAppBase::KillDialog)
     pub fn kill_dialog(&mut self, dialog_id: i32) {
+        log::info!("SexyAppBase::kill_dialog: 关闭对话框 {}", dialog_id);
         if let Some(index) = self.m_dialog_map.remove(&dialog_id) {
             self.m_dialog_list.retain(|&i| i != index);
         }
@@ -439,6 +459,7 @@ impl SexyAppBase {
 
     /// 关闭所有对话框 (对应 C++ SexyAppBase::KillAllDialogs)
     pub fn kill_all_dialogs(&mut self) {
+        log::info!("SexyAppBase::kill_all_dialogs: 关闭所有对话框，数量 {}", self.m_dialog_map.len());
         self.m_dialog_map.clear();
         self.m_dialog_list.clear();
     }
@@ -447,6 +468,7 @@ impl SexyAppBase {
 
     /// 读取注册表 (对应 C++ SexyAppBase::ReadFromRegistry)
     pub fn read_from_registry(&mut self) {
+        log::info!("SexyAppBase::read_from_registry: 读取注册表");
         let reg_path = self.get_registry_path();
         if let Ok(data) = fs::read_to_string(&reg_path) {
             for line in data.lines() {
@@ -454,16 +476,22 @@ impl SexyAppBase {
                     self.m_registry_values.insert(key.to_string(), value.to_string());
                 }
             }
+            log::debug!("SexyAppBase::read_from_registry: 读取了 {} 个注册表值", self.m_registry_values.len());
+        } else {
+            log::warn!("SexyAppBase::read_from_registry: 注册表文件读取失败");
         }
 
         // 恢复保存的设置
         self.m_is_windowed = self.get_registry_bool("IsWindowed", true);
         self.m_full_screen = !self.m_is_windowed;
+        log::debug!("SexyAppBase::read_from_registry: 窗口模式 {}", self.m_is_windowed);
     }
 
     /// 写入注册表 (对应 C++ SexyAppBase::WriteToRegistry)
     pub fn write_to_registry(&mut self) {
+        log::info!("SexyAppBase::write_to_registry: 写入注册表");
         if !self.m_registry_need_write {
+            log::trace!("SexyAppBase::write_to_registry: 无需写入");
             return;
         }
 
@@ -474,6 +502,7 @@ impl SexyAppBase {
         }
         let _ = fs::write(&reg_path, &content);
         self.m_registry_need_write = false;
+        log::info!("SexyAppBase::write_to_registry: 注册表写入完成");
     }
 
     /// 获取注册表值
@@ -485,6 +514,7 @@ impl SexyAppBase {
 
     /// 设置注册表值
     pub fn set_registry_value(&mut self, key: &str, value: &str) {
+        log::debug!("SexyAppBase::set_registry_value: 设置注册表值 {}={}", key, value);
         self.m_registry_values.insert(key.to_string(), value.to_string());
         self.m_registry_need_write = true;
     }
@@ -503,6 +533,7 @@ impl SexyAppBase {
 
     /// 加载属性文件 (对应 C++ SexyAppBase::LoadProperties)
     pub fn load_properties(&mut self, filename: &str, _check_sig: bool) -> bool {
+        log::info!("SexyAppBase::load_properties: 加载属性文件 {}", filename);
         // 简化实现：从 XML 或 INI 文件加载属性
         match fs::read_to_string(filename) {
             Ok(content) => {
@@ -518,9 +549,13 @@ impl SexyAppBase {
                         self.m_properties_map.insert(key, value);
                     }
                 }
+                log::info!("SexyAppBase::load_properties: 属性文件 {} 加载完成，共 {} 个属性", filename, self.m_properties_map.len());
                 true
             }
-            Err(_) => false,
+            Err(e) => {
+                log::error!("SexyAppBase::load_properties: 属性文件 {} 加载失败: {}", filename, e);
+                false
+            }
         }
     }
 
@@ -553,6 +588,7 @@ impl SexyAppBase {
     // ── 资源路径管理 ──
 
     pub fn set_app_data_folder(&mut self, path: &str) {
+        log::info!("SexyAppBase::set_app_data_folder: 设置应用数据文件夹 {}", path);
         self.m_app_data_folder = path.to_string();
         // 确保目录存在
         let _ = fs::create_dir_all(path);
@@ -563,6 +599,7 @@ impl SexyAppBase {
     }
 
     pub fn set_resource_folder(&mut self, path: &str) {
+        log::info!("SexyAppBase::set_resource_folder: 设置资源文件夹 {}", path);
         self.m_resource_folder = path.to_string();
     }
 
@@ -573,15 +610,18 @@ impl SexyAppBase {
     // ── 声音管理 ──
 
     pub fn install_sound_manager(&mut self, manager: SoundManager) {
+        log::info!("SexyAppBase::install_sound_manager: 安装音效管理器");
         self.m_sound_manager = Some(manager);
         self.m_sound_manager_installed = true;
     }
 
     pub fn set_music_interface(&mut self, music: MusicInterface) {
+        log::info!("SexyAppBase::set_music_interface: 设置音乐接口");
         self.m_music_interface = Some(music);
     }
 
     pub fn mute(&mut self, muted: bool) {
+        log::info!("SexyAppBase::mute: 设置静音 {}", muted);
         self.m_muted = muted;
         if let Some(ref mut sm) = self.m_sound_manager {
             sm.set_master_volume(if muted { 0.0 } else { 1.0 });
@@ -591,11 +631,13 @@ impl SexyAppBase {
     // ── Cursor 管理 ──
 
     pub fn set_cursor(&mut self, cursor: CursorType) {
+        log::debug!("SexyAppBase::set_cursor: 设置光标 {:?}", cursor);
         self.m_cursor_num = cursor;
     }
 
     /// 隐藏/显示光标 (对应 C++ SexyAppBase::SetCursorImage)
     pub fn set_cursor_image(&mut self, cursor: CursorType, _image: Option<&Image>) {
+        log::debug!("SexyAppBase::set_cursor_image: 设置光标图像 {:?}", cursor);
         self.m_cursor_num = cursor;
     }
 
@@ -603,11 +645,13 @@ impl SexyAppBase {
 
     /// 获取每帧毫秒数 (对应 C++ SexyAppBase::GetMilliPerFrame)
     pub fn get_milli_per_frame(&self) -> u32 {
+        log::trace!("SexyAppBase::get_milli_per_frame: 获取每帧毫秒数 {}", self.m_milli_per_frame);
         self.m_milli_per_frame
     }
 
     /// 设置帧率 (对应 C++ SexyAppBase::SetFramesPerSecond)
     pub fn set_frames_per_second(&mut self, fps: u32) {
+        log::info!("SexyAppBase::set_frames_per_second: 设置帧率 {}", fps);
         if fps > 0 {
             self.m_milli_per_frame = 1000 / fps;
         }
@@ -642,20 +686,27 @@ impl SexyAppBase {
 
     /// 检查文件是否存在 (对应 C++ FileExists)
     pub fn file_exists(filename: &str) -> bool {
-        Path::new(filename).exists()
+        let result = Path::new(filename).exists();
+        log::trace!("SexyAppBase::file_exists: 检查文件 {} 是否存在，结果 {}", filename, result);
+        result
     }
 
     /// 获取随机种子 (对应 C++ SexyAppBase::SRand)
     pub fn srand(&mut self, seed: u64) {
+        log::info!("SexyAppBase::srand: 设置随机种子 {}", seed);
         self.m_rand = MTRand::with_seed(seed);
     }
 
     /// 获取随机数 (对应 C++ Rand)
     pub fn rand(&mut self) -> i32 {
-        self.m_rand.next_int(i32::MAX)
+        let result = self.m_rand.next_int(i32::MAX);
+        log::trace!("SexyAppBase::rand: 生成随机数 {}", result);
+        result
     }
 
     pub fn rand_range(&mut self, range: i32) -> i32 {
-        self.m_rand.next_int(range)
+        let result = self.m_rand.next_int(range);
+        log::trace!("SexyAppBase::rand_range: 生成随机数 {}，范围 [0, {})", result, range);
+        result
     }
 }

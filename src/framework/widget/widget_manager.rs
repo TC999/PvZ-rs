@@ -34,6 +34,7 @@ pub trait WidgetLike {
 
 impl WidgetManager {
     pub fn new() -> Self {
+        log::debug!("WidgetManager::new: 创建控件管理器");
         Self {
             widgets: Vec::new(),
             mouse_x: 0,
@@ -65,6 +66,7 @@ impl WidgetManager {
     }
 
     pub fn update(&mut self) {
+        log::trace!("WidgetManager::update: 更新 {} 个控件，更新次数 {}", self.widgets.len(), self.update_count);
         for i in 0..self.widgets.len() {
             self.widgets[i].update();
         }
@@ -72,6 +74,7 @@ impl WidgetManager {
     }
 
     pub fn draw(&self, g: &Graphics) {
+        log::trace!("WidgetManager::draw: 绘制 {} 个控件", self.widgets.len());
         for w in &self.widgets {
             if w.as_widget().visible {
                 w.draw(g);

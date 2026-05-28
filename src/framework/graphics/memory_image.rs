@@ -15,10 +15,12 @@ pub struct MemoryImage {
 
 impl MemoryImage {
     pub fn new() -> Self {
+        log::debug!("MemoryImage::new: 创建内存图像");
         Self { width: 0, height: 0, bits: Vec::new(), shared: false }
     }
 
     pub fn create(&mut self, width: i32, height: i32) {
+        log::info!("MemoryImage::create: 创建内存图像，尺寸 {}x{}", width, height);
         self.width = width;
         self.height = height;
         self.bits.resize((width * height) as usize, 0);

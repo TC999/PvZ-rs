@@ -94,6 +94,7 @@ pub struct LawnApp {
 
 impl LawnApp {
     pub fn new() -> Self {
+        log::info!("LawnApp::new: 创建新的LawnApp实例");
         Self {
             board: None,
             title_screen: TitleScreen::new(),
@@ -158,32 +159,41 @@ impl LawnApp {
     }
 
     pub fn set_screen_size(&mut self, w: i32, h: i32) {
+        log::debug!("LawnApp::set_screen_size: 设置屏幕尺寸为 {}x{}", w, h);
         self.screen_width = w;
         self.screen_height = h;
     }
 
     pub fn init(&mut self) {
+        log::info!("LawnApp::init: 初始化LawnApp，屏幕尺寸 {}x{}", self.screen_width, self.screen_height);
         self.game_scene = GameScenes::Menu;
-        log::info!("LawnApp initialized (screen: {}x{})", self.screen_width, self.screen_height);
+        log::info!("LawnApp::init: 游戏场景设置为 Menu");
     }
 
     pub fn start(&mut self) {
+        log::info!("LawnApp::start: 启动游戏，设置场景为 Menu");
         self.game_scene = GameScenes::Menu;
         self.title_screen.start();
+        log::info!("LawnApp::start: 标题屏幕已启动");
     }
 
     pub fn update(&mut self) {
+        log::trace!("LawnApp::update: 更新计数器 {}", self.app_counter);
         self.app_counter = self.app_counter.wrapping_add(1);
         match self.game_scene {
             GameScenes::Menu => {
+                log::trace!("LawnApp::update: 当前场景 Menu，更新标题屏幕");
                 self.title_screen.update();
             }
             GameScenes::Playing => {
+                log::trace!("LawnApp::update: 当前场景 Playing，更新游戏板");
                 if let Some(ref mut board) = self.board {
                     board.update();
                 }
             }
-            _ => {}
+            _ => {
+                log::trace!("LawnApp::update: 当前场景 {:?}", self.game_scene);
+            }
         }
         self.music.update();
         self.pool_effect.update();
@@ -192,65 +202,82 @@ impl LawnApp {
     }
 
     pub fn new_game(&mut self, game_mode: GameMode) {
+        log::info!("LawnApp::new_game: 开始新游戏，模式 {:?}", game_mode);
         self.game_mode = game_mode;
         self.make_new_board();
         self.start_playing();
+        log::info!("LawnApp::new_game: 新游戏初始化完成");
     }
 
     pub fn make_new_board(&mut self) {
+        log::info!("LawnApp::make_new_board: 创建新的游戏板");
         self.board = Some(Box::new(Board::new()));
+        log::info!("LawnApp::make_new_board: 游戏板创建完成");
     }
 
     pub fn start_playing(&mut self) {
+        log::info!("LawnApp::start_playing: 开始游戏，设置场景为 Playing");
         self.game_scene = GameScenes::Playing;
     }
 
     pub fn kill_board(&mut self) {
+        log::info!("LawnApp::kill_board: 销毁游戏板");
         self.board = None;
     }
 
     pub fn show_seed_chooser_screen(&mut self) {
+        log::info!("LawnApp::show_seed_chooser_screen: 显示种子选择屏幕");
         self.seed_chooser_screen.active = true;
     }
 
     pub fn show_award_screen(&mut self, award_type: AwardType) {
+        log::info!("LawnApp::show_award_screen: 显示奖励屏幕，类型 {:?}", award_type);
         self.award_screen.active = true;
         self.award_screen.award_type = award_type;
         self.award_screen.counter = 0;
     }
 
     pub fn do_new_options(&mut self) {
+        log::info!("LawnApp::do_new_options: 打开选项对话框（待实现）");
         // TODO: 打开选项对话框
     }
 
     pub fn handle_cheat_code(&mut self, key: i32) {
+        log::debug!("LawnApp::handle_cheat_code: 处理按键 {}", key);
         let ch = key as u8 as char;
         if self.konami_check.add_char(ch) {
-            // 科乐美作弊码激活
+            log::info!("LawnApp::handle_cheat_code: 科乐美作弊码激活");
         }
         if self.mustache_check.add_char(ch) {
             self.mustache_mode = !self.mustache_mode;
+            log::info!("LawnApp::handle_cheat_code: 胡子模式 {}", self.mustache_mode);
         }
         if self.future_check.add_char(ch) {
             self.future_mode = true;
+            log::info!("LawnApp::handle_cheat_code: 未来模式激活");
         }
         if self.pinata_check.add_char(ch) {
             self.pinata_mode = true;
+            log::info!("LawnApp::handle_cheat_code: 皮纳塔模式激活");
         }
         if self.dance_check.add_char(ch) {
             self.dance_mode = true;
+            log::info!("LawnApp::handle_cheat_code: 舞蹈模式激活");
         }
         if self.daisy_check.add_char(ch) {
             self.daisy_mode = true;
+            log::info!("LawnApp::handle_cheat_code: 雏菊模式激活");
         }
     }
 
     pub fn is_adventure_mode(&self) -> bool {
-        self.game_mode == GameMode::Adventure
+        let result = self.game_mode == GameMode::Adventure;
+        log::trace!("LawnApp::is_adventure_mode: {}", result);
+        result
     }
 
     pub fn is_survival_mode(&self) -> bool {
-        matches!(
+        let result = matches!(
             self.game_mode,
             GameMode::SurvivalNormalStage1
                 | GameMode::SurvivalNormalStage2
@@ -267,109 +294,142 @@ impl LawnApp {
                 | GameMode::SurvivalEndlessStage3
                 | GameMode::SurvivalEndlessStage4
                 | GameMode::SurvivalEndlessStage5
-        )
+        );
+        log::trace!("LawnApp::is_survival_mode: {}", result);
+        result
     }
 
     pub fn shutdown(&mut self) {
+        log::info!("LawnApp::shutdown: 关闭LawnApp");
         self.kill_board();
-        log::info!("LawnApp shutdown");
+        log::info!("LawnApp::shutdown: LawnApp已关闭");
     }
 
     // ── 渲染 ──
     pub fn draw(&mut self, g: &Graphics, canvas: &mut sdl2::render::Canvas<sdl2::video::Window>) {
+        log::trace!("LawnApp::draw: 开始绘制，当前场景 {:?}", self.game_scene);
         match self.game_scene {
             GameScenes::Menu => {
+                log::trace!("LawnApp::draw: 绘制标题屏幕");
                 self.title_screen.draw(g, canvas);
             }
             GameScenes::Playing => {
+                log::trace!("LawnApp::draw: 绘制游戏板");
                 if let Some(ref mut board) = self.board {
                     board.draw(g, canvas);
                 }
             }
-            _ => {}
+            _ => {
+                log::trace!("LawnApp::draw: 未知场景 {:?}", self.game_scene);
+            }
         }
     }
 
     // ── 输入事件处理 ──
     pub fn key_down(&mut self, key: i32) {
+        log::debug!("LawnApp::key_down: 按键按下 {}", key);
         // 检测作弊码
         if self.tod_cheat_keys {
             self.handle_cheat_code(key);
         }
         match self.game_scene {
             GameScenes::Menu => {
+                log::trace!("LawnApp::key_down: 转发按键到标题屏幕");
                 self.title_screen.key_down(key);
             }
             GameScenes::Playing => {
+                log::trace!("LawnApp::key_down: 转发按键到游戏板");
                 if let Some(ref mut board) = self.board {
                     board.key_down(key);
                 }
             }
-            _ => {}
+            _ => {
+                log::trace!("LawnApp::key_down: 未知场景 {:?}", self.game_scene);
+            }
         }
     }
 
     pub fn key_up(&mut self, key: i32) {
+        log::debug!("LawnApp::key_up: 按键释放 {}", key);
         match self.game_scene {
             GameScenes::Menu => {
+                log::trace!("LawnApp::key_up: 转发按键到标题屏幕");
                 self.title_screen.key_up(key);
             }
             GameScenes::Playing => {
+                log::trace!("LawnApp::key_up: 转发按键到游戏板");
                 if let Some(ref mut board) = self.board {
                     board.key_up(key);
                 }
             }
-            _ => {}
+            _ => {
+                log::trace!("LawnApp::key_up: 未知场景 {:?}", self.game_scene);
+            }
         }
     }
 
     pub fn mouse_down(&mut self, x: i32, y: i32, clicks: i32) {
+        log::debug!("LawnApp::mouse_down: 鼠标按下 ({}, {}), 点击次数 {}", x, y, clicks);
         self.mouse_x = x;
         self.mouse_y = y;
         self.is_down = true;
         match self.game_scene {
             GameScenes::Menu => {
+                log::trace!("LawnApp::mouse_down: 转发鼠标事件到标题屏幕");
                 self.title_screen.mouse_down(x, y, clicks);
             }
             GameScenes::Playing => {
+                log::trace!("LawnApp::mouse_down: 转发鼠标事件到游戏板");
                 if let Some(ref mut board) = self.board {
                     board.mouse_down(x, y, clicks);
                 }
             }
-            _ => {}
+            _ => {
+                log::trace!("LawnApp::mouse_down: 未知场景 {:?}", self.game_scene);
+            }
         }
     }
 
     pub fn mouse_up(&mut self, x: i32, y: i32, clicks: i32) {
+        log::debug!("LawnApp::mouse_up: 鼠标释放 ({}, {}), 点击次数 {}", x, y, clicks);
         self.mouse_x = x;
         self.mouse_y = y;
         self.is_down = false;
         match self.game_scene {
             GameScenes::Menu => {
+                log::trace!("LawnApp::mouse_up: 转发鼠标事件到标题屏幕");
                 self.title_screen.mouse_up(x, y, clicks);
             }
             GameScenes::Playing => {
+                log::trace!("LawnApp::mouse_up: 转发鼠标事件到游戏板");
                 if let Some(ref mut board) = self.board {
                     board.mouse_up(x, y, clicks);
                 }
             }
-            _ => {}
+            _ => {
+                log::trace!("LawnApp::mouse_up: 未知场景 {:?}", self.game_scene);
+            }
         }
     }
 
     pub fn mouse_move(&mut self, x: i32, y: i32) {
+        log::trace!("LawnApp::mouse_move: 鼠标移动 ({}, {})", x, y);
         self.mouse_x = x;
         self.mouse_y = y;
         match self.game_scene {
             GameScenes::Menu => {
+                log::trace!("LawnApp::mouse_move: 转发鼠标事件到标题屏幕");
                 self.title_screen.mouse_move(x, y);
             }
             GameScenes::Playing => {
+                log::trace!("LawnApp::mouse_move: 转发鼠标事件到游戏板");
                 if let Some(ref mut board) = self.board {
                     board.mouse_move(x, y);
                 }
             }
-            _ => {}
+            _ => {
+                log::trace!("LawnApp::mouse_move: 未知场景 {:?}", self.game_scene);
+            }
         }
     }
 }

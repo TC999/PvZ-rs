@@ -8,6 +8,7 @@ pub struct Font {
 
 impl Font {
     pub fn new(name: &str, size: i32) -> Self {
+        log::debug!("Font::new: 创建字体，名称 {}，大小 {}", name, size);
         Self { name: name.to_string(), size }
     }
 }

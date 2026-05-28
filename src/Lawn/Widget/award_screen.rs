@@ -6,6 +6,12 @@ pub struct AwardScreen {
     pub counter: i32,
 }
 impl AwardScreen {
-    pub fn new() -> Self { Self { active: false, award_type: AwardType::ForLevel, counter: 0 } }
-    pub fn update(&mut self) { if self.active { self.counter += 1; } }
+    pub fn new() -> Self {
+        log::debug!("AwardScreen::new: 创建奖励屏幕");
+        Self { active: false, award_type: AwardType::ForLevel, counter: 0 }
+    }
+    pub fn update(&mut self) {
+        log::trace!("AwardScreen::update: 更新奖励屏幕，active={}, counter={}", self.active, self.counter);
+        if self.active { self.counter += 1; }
+    }
 }

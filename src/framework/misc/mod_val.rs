@@ -14,6 +14,7 @@ pub struct ModVal {
 
 impl ModVal {
     pub fn new(curve: TodCurves) -> Self {
+        log::debug!("ModVal::new: 创建值修饰器，曲线 {:?}", curve);
         Self {
             value: 0.0,
             target: 0.0,
@@ -26,6 +27,7 @@ impl ModVal {
     }
 
     pub fn set_target(&mut self, target: f32, duration: f32) {
+        log::debug!("ModVal::set_target: 设置目标值 {}，持续时间 {}", target, duration);
         self.start_value = self.value;
         self.target = target;
         self.duration = duration;
@@ -34,7 +36,11 @@ impl ModVal {
     }
 
     pub fn update(&mut self, dt: f32) {
-        if !self.active { return; }
+        log::trace!("ModVal::update: 更新值修饰器，当前值 {}，目标值 {}，active={}", self.value, self.target, self.active);
+        if !self.active {
+            log::trace!("ModVal::update: 值修饰器未激活，跳过更新");
+            return;
+        }
         self.elapsed += dt;
         let t = if self.duration > 0.0 {
             (self.elapsed / self.duration).clamp(0.0, 1.0)
@@ -45,6 +51,7 @@ impl ModVal {
         self.value = self.start_value + (self.target - self.start_value) * self.apply_curve(t);
 
         if t >= 1.0 {
+            log::info!("ModVal::update: 值修饰器完成，最终值 {}", self.target);
             self.active = false;
             self.value = self.target;
         }

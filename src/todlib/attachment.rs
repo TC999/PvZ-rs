@@ -10,6 +10,7 @@ pub struct Attachment {
 
 impl Attachment {
     pub fn new() -> Self {
+        log::debug!("Attachment::new: 创建附件");
         Self {
             effect_type: EffectType::Attachment,
             dead: false,
@@ -17,14 +18,17 @@ impl Attachment {
     }
 
     pub fn update(&mut self) {
+        log::trace!("Attachment::update: 更新附件，类型 {:?}", self.effect_type);
         // TODO: 实现附件更新逻辑
     }
 
     pub fn draw(&self) {
+        log::trace!("Attachment::draw: 绘制附件，类型 {:?}", self.effect_type);
         // TODO: 实现附件绘制逻辑
     }
 
     pub fn is_dead(&self) -> bool {
+        log::trace!("Attachment::is_dead: 附件状态 dead={}", self.dead);
         self.dead
     }
 }

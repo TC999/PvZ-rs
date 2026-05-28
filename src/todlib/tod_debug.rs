@@ -8,18 +8,19 @@ pub struct TodDebug;
 
 impl TodDebug {
     pub fn trace(msg: &str) {
-        debug!("{}", msg);
+        log::trace!("TodDebug::trace: {}", msg);
     }
 
     pub fn log(msg: &str) {
-        info!("{}", msg);
+        log::info!("TodDebug::log: {}", msg);
     }
 
     pub fn error(msg: &str) {
-        error!("{}", msg);
+        log::error!("TodDebug::error: {}", msg);
     }
 
     pub fn assert_fail(msg: &str) {
+        log::error!("TodDebug::assert_fail: 断言失败: {}", msg);
         panic!("Assertion failed: {}", msg);
     }
 }

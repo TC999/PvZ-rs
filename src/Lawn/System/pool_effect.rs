@@ -11,6 +11,7 @@ pub struct PoolEffect {
 
 impl PoolEffect {
     pub fn new() -> Self {
+        log::debug!("PoolEffect::new: 创建泳池水波效果");
         Self {
             active: false,
             wave_offset: 0.0,
@@ -21,11 +22,17 @@ impl PoolEffect {
     }
 
     pub fn update(&mut self) {
-        if !self.active { return; }
+        log::trace!("PoolEffect::update: 更新水波效果，active={}", self.active);
+        if !self.active {
+            log::trace!("PoolEffect::update: 水波效果未激活，跳过更新");
+            return;
+        }
         self.wave_offset += self.wave_speed;
     }
 
     pub fn get_wave_y(&self, x: f32) -> f32 {
-        (x * self.frequency + self.wave_offset).sin() * self.amplitude
+        let result = (x * self.frequency + self.wave_offset).sin() * self.amplitude;
+        log::trace!("PoolEffect::get_wave_y: x={}, 结果 {}", x, result);
+        result
     }
 }

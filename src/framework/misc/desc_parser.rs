@@ -14,10 +14,12 @@ pub struct DescParser {
 
 impl DescParser {
     pub fn new() -> Self {
+        log::debug!("DescParser::new: 创建描述文件解析器");
         Self { entries: Vec::new() }
     }
 
     pub fn parse(&mut self, content: &str) {
+        log::info!("DescParser::parse: 解析描述文件内容");
         for line in content.lines() {
             let line = line.trim();
             if line.is_empty() || line.starts_with("//") { continue; }
@@ -28,12 +30,15 @@ impl DescParser {
                     .split(',')
                     .map(|s| s.trim().to_string())
                     .collect();
+                log::trace!("DescParser::parse: 解析条目 {}，值 {:?}", key, values);
                 self.entries.push(DescEntry { key, values });
             }
         }
+        log::info!("DescParser::parse: 解析完成，共 {} 个条目", self.entries.len());
     }
 
     pub fn get_entry(&self, key: &str) -> Option<&DescEntry> {
+        log::trace!("DescParser::get_entry: 获取条目 {}", key);
         self.entries.iter().find(|e| e.key == key)
     }
 }

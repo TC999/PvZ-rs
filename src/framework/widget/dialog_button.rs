@@ -12,6 +12,7 @@ pub struct DialogButton {
 
 impl DialogButton {
     pub fn new(label: &str, dialog_result: i32) -> Self {
+        log::debug!("DialogButton::new: 创建对话框按钮，标签 {}，结果 {}", label, dialog_result);
         Self {
             button: ButtonWidget::new(0, label),
             dialog_result,

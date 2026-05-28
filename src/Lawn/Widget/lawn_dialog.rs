@@ -8,7 +8,10 @@ pub struct LawnDialog {
 }
 impl LawnDialog {
     pub fn new(dialog_type: Dialogs) -> Self {
+        log::debug!("LawnDialog::new: 创建草坪对话框，类型 {:?}", dialog_type);
         Self { active: false, dialog_type, result: 0, message: String::new() }
     }
-    pub fn update(&mut self) {}
+    pub fn update(&mut self) {
+        log::trace!("LawnDialog::update: 更新草坪对话框，active={}", self.active);
+    }
 }

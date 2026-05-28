@@ -15,6 +15,7 @@ pub struct HyperlinkWidget {
 
 impl HyperlinkWidget {
     pub fn new(url: &str, label: &str) -> Self {
+        log::debug!("HyperlinkWidget::new: 创建超链接控件，URL {}，标签 {}", url, label);
         Self {
             widget: Widget::new(0, 0, 200, 20),
             url: url.to_string(),

@@ -13,6 +13,7 @@ pub struct CursorObject {
 
 impl CursorObject {
     pub fn new() -> Self {
+        log::debug!("CursorObject::new: 创建光标对象");
         Self {
             cursor_type: CursorType::Normal,
             x: 0,
@@ -24,10 +25,12 @@ impl CursorObject {
     }
 
     pub fn update(&mut self) {
+        log::trace!("CursorObject::update: 更新光标对象，位置 ({}, {})", self.x, self.y);
         self.anim_counter += 1;
     }
 
     pub fn draw(&self) {
+        log::trace!("CursorObject::draw: 绘制光标对象");
         // TODO: 绘制光标
     }
 }

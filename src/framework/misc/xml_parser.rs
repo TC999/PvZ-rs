@@ -37,13 +37,16 @@ pub struct XMLParser {
 
 impl XMLParser {
     pub fn new() -> Self {
+        log::debug!("XMLParser::new: 创建 XML 解析器");
         Self {
             root: XMLElement::new("root"),
         }
     }
 
-    pub fn parse_file(&mut self, _filename: &str) -> bool {
+    pub fn parse_file(&mut self, filename: &str) -> bool {
+        log::info!("XMLParser::parse_file: 解析文件 {}", filename);
         // TODO: 使用 quick-xml 库实现真正的 XML 解析
+        log::warn!("XMLParser::parse_file: XML 解析功能待实现");
         false
     }
 

@@ -17,6 +17,7 @@ pub struct EffectSystem {
 
 impl EffectSystem {
     pub fn new() -> Self {
+        log::debug!("EffectSystem::new: 创建特效系统");
         Self {
             particle_systems: Vec::new(),
             reanimations: Vec::new(),
@@ -26,10 +27,13 @@ impl EffectSystem {
     }
 
     pub fn update(&mut self) {
+        log::trace!("EffectSystem::update: 更新特效系统，粒子系统 {} 个，动画 {} 个，轨迹 {} 个，附件 {} 个",
+            self.particle_systems.len(), self.reanimations.len(), self.trails.len(), self.attachments.len());
         // TODO: 更新所有特效
     }
 
     pub fn draw(&self) {
+        log::trace!("EffectSystem::draw: 绘制特效系统");
         // TODO: 绘制所有特效
     }
 }

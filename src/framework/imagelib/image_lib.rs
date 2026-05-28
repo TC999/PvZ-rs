@@ -60,13 +60,16 @@ pub fn get_auto_load_alpha() -> bool {
 /// 从文件加载图像 (对应 C++ ImageLib::GetImage)
 /// 根据文件扩展名自动选择解码器
 pub fn get_image(filename: &str, look_for_alpha_image: bool) -> Option<Image> {
+    log::info!("image_lib::get_image: 加载图像文件 {}", filename);
     let path = Path::new(filename);
 
     // Try loading from filesystem
     if let Ok(data) = fs::read(filename) {
+        log::debug!("image_lib::get_image: 文件读取成功，大小 {} 字节", data.len());
         return decode_image_data(&data, path.extension().and_then(|e| e.to_str()));
     }
 
+    log::warn!("image_lib::get_image: 文件 {} 读取失败", filename);
     // ASSUMPTION: If direct filesystem read fails, attempt via resource folder
     // (In full C++ implementation, this uses PakInterface for PAK file access)
     None
@@ -74,16 +77,21 @@ pub fn get_image(filename: &str, look_for_alpha_image: bool) -> Option<Image> {
 
 /// 根据数据解码图像 (对应 C++ 中 GetPNGImage/GetJPEGImage/GetGIFImage/GetTGAImage)
 fn decode_image_data(data: &[u8], ext: Option<&str>) -> Option<Image> {
+    log::debug!("image_lib::decode_image_data: 解码图像数据，大小 {} 字节，扩展名 {:?}", data.len(), ext);
     // Use the `image` crate to decode common formats
     // FIXME: GIF animation support not implemented
     // FIXME: JPEG2000 alpha channel detection not implemented
 
     let img = match image::load_from_memory(data) {
         Ok(img) => img.to_rgba8(),
-        Err(_) => return None,
+        Err(e) => {
+            log::error!("image_lib::decode_image_data: 图像解码失败: {}", e);
+            return None;
+        }
     };
 
     let (width, height) = img.dimensions();
+    log::debug!("image_lib::decode_image_data: 图像尺寸 {}x{}", width, height);
     let raw = img.into_raw();
 
     // Convert RGBA bytes to u32 pixels
@@ -96,24 +104,28 @@ fn decode_image_data(data: &[u8], ext: Option<&str>) -> Option<Image> {
         bits.push(pixel);
     }
 
+    log::info!("image_lib::decode_image_data: 图像解码成功，{} 个像素", bits.len());
     Some(Image::from_raw(width as i32, height as i32, bits))
 }
 
 /// 保存 JPEG 图像 (对应 C++ ImageLib::WriteJPEGImage)
-pub fn write_jpeg_image(_filename: &str, _image: &Image) -> bool {
+pub fn write_jpeg_image(filename: &str, _image: &Image) -> bool {
+    log::warn!("image_lib::write_jpeg_image: JPEG 编码功能未实现，文件 {}", filename);
     // FIXME: JPEG encoding not implemented
     // C++ version uses libjpeg; Rust version could use image crate
     false
 }
 
 /// 保存 PNG 图像 (对应 C++ ImageLib::WritePNGImage)
-pub fn write_png_image(_filename: &str, _image: &Image) -> bool {
+pub fn write_png_image(filename: &str, _image: &Image) -> bool {
+    log::warn!("image_lib::write_png_image: PNG 编码功能未实现，文件 {}", filename);
     // FIXME: PNG encoding not implemented
     false
 }
 
 /// 保存 TGA 图像 (对应 C++ ImageLib::WriteTGAImage)
-pub fn write_tga_image(_filename: &str, _image: &Image) -> bool {
+pub fn write_tga_image(filename: &str, _image: &Image) -> bool {
+    log::warn!("image_lib::write_tga_image: TGA 编码功能未实现，文件 {}", filename);
     // FIXME: TGA encoding not implemented
     false
 }

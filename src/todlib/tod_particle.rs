@@ -21,6 +21,7 @@ pub struct TodParticle {
 
 impl TodParticle {
     pub fn new(particle_type: ParticleEffect, x: f32, y: f32) -> Self {
+        log::debug!("TodParticle::new: 创建粒子，类型 {:?}，位置 ({}, {})", particle_type, x, y);
         Self {
             x,
             y,
@@ -39,11 +40,16 @@ impl TodParticle {
     }
 
     pub fn update(&mut self) {
-        if self.dead { return; }
+        log::trace!("TodParticle::update: 更新粒子，类型 {:?}，位置 ({}, {})，生命 {}", self.particle_type, self.x, self.y, self.life);
+        if self.dead {
+            log::trace!("TodParticle::update: 粒子已死亡，跳过更新");
+            return;
+        }
         self.life -= 0.01;
         self.x += self.vx;
         self.y += self.vy;
         if self.life <= 0.0 {
+            log::info!("TodParticle::update: 粒子生命结束");
             self.dead = true;
         }
     }
@@ -93,6 +99,7 @@ pub struct TodParticleSystem {
 
 impl TodParticleSystem {
     pub fn new(particle_type: ParticleEffect) -> Self {
+        log::debug!("TodParticleSystem::new: 创建粒子系统，类型 {:?}", particle_type);
         Self {
             particles: Vec::new(),
             emitters: Vec::new(),
@@ -102,6 +109,8 @@ impl TodParticleSystem {
     }
 
     pub fn update(&mut self) {
+        log::trace!("TodParticleSystem::update: 更新粒子系统，类型 {:?}，粒子数 {}，发射器数 {}", 
+            self.particle_type, self.particles.len(), self.emitters.len());
         // 更新现有粒子
         for p in &mut self.particles {
             p.update();
@@ -116,6 +125,7 @@ impl TodParticleSystem {
     }
 
     pub fn draw(&self) {
+        log::trace!("TodParticleSystem::draw: 绘制粒子系统，类型 {:?}", self.particle_type);
         // TODO: 绘制粒子
     }
 }

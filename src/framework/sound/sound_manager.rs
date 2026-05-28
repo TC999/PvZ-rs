@@ -18,6 +18,7 @@ pub struct SoundManager {
 
 impl SoundManager {
     pub fn new() -> Self {
+        log::debug!("SoundManager::new: 创建音效管理器");
         Self { initialized: false, master_volume: 1.0 }
     }
 

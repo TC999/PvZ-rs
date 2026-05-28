@@ -11,14 +11,19 @@ pub struct MusicInterface {
 
 impl MusicInterface {
     pub fn new() -> Self {
+        log::debug!("MusicInterface::new: 创建音乐接口");
         Self { global_volume: 100 }
     }
 
     pub fn set_volume(&mut self, volume: f64) {
+        log::info!("MusicInterface::set_volume: 设置音量 {}", volume);
         self.global_volume = (volume * 100.0).clamp(0.0, 100.0) as i32;
     }
 
-    pub fn get_volume(&self) -> i32 { self.global_volume }
+    pub fn get_volume(&self) -> i32 {
+        log::trace!("MusicInterface::get_volume: 获取音量 {}", self.global_volume);
+        self.global_volume
+    }
 }
 
 /// SDLMusicInfo - 音乐轨道信息 (对应 C++ Sexy::SDLMusicInfo)

@@ -16,6 +16,7 @@ pub struct GridItem {
 
 impl GridItem {
     pub fn new(item_type: GridItemType, col: i32, row: i32) -> Self {
+        log::info!("GridItem::new: 创建格子物品，类型 {:?}，位置 ({}, {})", item_type, col, row);
         Self {
             grid_item_type: item_type,
             grid_item_state: GridItemState::Normal,
@@ -30,12 +31,17 @@ impl GridItem {
     }
 
     pub fn update(&mut self) {
-        if !self.active { return; }
+        log::trace!("GridItem::update: 更新格子物品，类型 {:?}，位置 ({}, {})", self.grid_item_type, self.col, self.row);
+        if !self.active {
+            log::trace!("GridItem::update: 格子物品未激活，跳过更新");
+            return;
+        }
         self.counter += 1;
         self.anim_counter += 1;
     }
 
     pub fn draw(&self) {
+        log::trace!("GridItem::draw: 绘制格子物品，类型 {:?}", self.grid_item_type);
         // TODO: 绘制格子物品
     }
 }

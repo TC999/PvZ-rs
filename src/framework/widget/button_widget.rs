@@ -21,6 +21,7 @@ pub struct ButtonWidget {
 
 impl ButtonWidget {
     pub fn new(id: usize, label: &str) -> Self {
+        log::debug!("ButtonWidget::new: 创建按钮，ID {}，标签 {}", id, label);
         Self {
             widget: Widget::new(0, 0, 100, 30),
             label: label.to_string(),
@@ -37,6 +38,7 @@ impl ButtonWidget {
     }
 
     pub fn set_text(&mut self, text: &str) {
+        log::debug!("ButtonWidget::set_text: 设置按钮文本 {}", text);
         self.label = text.to_string();
     }
 }
