@@ -8,6 +8,7 @@ pub mod resources;
 
 pub mod todlib;
 pub mod framework;
+#[path = "Lawn/mod.rs"]
 pub mod lawn;
 
 // Re-export commonly used types

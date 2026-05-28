@@ -16,5 +16,7 @@ pub mod seed_packet;
 pub mod tool_tip_widget;
 pub mod zen_garden;
 pub mod zombie;
+#[path = "System/mod.rs"]
 pub mod system;
+#[path = "Widget/mod.rs"]
 pub mod widget;
