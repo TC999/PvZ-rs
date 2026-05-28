@@ -1,0 +1,41 @@
+[package]
+name = "pvz_portable"
+version = "0.1.0"
+edition = "2021"
+description = "PvZ-Portable Rust rewrite - Plants vs Zombies game engine"
+
+[dependencies]
+# SDL2 binding - 对应 C++ 中的 SDL2 依赖 (SexyAppFramework)
+sdl2 = { version = "0.37", features = ["image", "mixer", "ttf"] }
+
+# OpenGL 绑定 - 对应 C++ 中的 OpenGL/GLES 渲染
+gl = "0.14"
+
+# 随机数 - 对应 C++ 中的 MTRand (Mersenne Twister)
+rand = "0.8"
+
+# 错误处理 - 替代 C++ 异常和错误码
+thiserror = "2"
+
+# 日志 - 对应 C++ 中的 TodDebug / 调试输出
+log = "0.4"
+env_logger = "0.11"
+
+# 惰性静态变量 - 对应 C++ 中的 static 局部变量
+once_cell = "1"
+
+# 序列化 - 对应 C++ 中的存档/数据序列化
+serde = { version = "1", features = ["derive"] }
+
+# XML 解析 - 对应 C++ 中的 XMLParser
+quick-xml = "0.37"
+
+# 字符串操作 - 对应 C++ 中的 SexyString/std::string 工具
+encoding_rs = "0.8"
+
+# 文件系统 - 对应 C++ 中的 PakInterface/PAK 读取
+flate2 = "1"  # zlib 解压，用于 PAK 文件读取
+
+[[bin]]
+name = "pvz_portable"
+path = "src/main.rs"
