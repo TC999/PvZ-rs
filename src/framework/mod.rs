@@ -4,3 +4,8 @@
 pub mod graphics;
 pub mod misc;
 pub mod widget;
+pub mod paklib;
+pub mod imagelib;
+pub mod sound;
+pub mod sex_app_base;
+pub mod sex_app;

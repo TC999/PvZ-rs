@@ -5,3 +5,8 @@ pub mod color;
 pub mod image;
 pub mod font;
 pub mod graphics;
+pub mod gl_image;
+pub mod gl_interface;
+pub mod memory_image;
+pub mod shared_image;
+pub mod image_font;

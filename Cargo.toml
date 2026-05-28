@@ -36,6 +36,9 @@ encoding_rs = "0.8"
 # 文件系统 - 对应 C++ 中的 PakInterface/PAK 读取
 flate2 = "1"  # zlib 解压，用于 PAK 文件读取
 
+# 图像解码 - 替代 C++ 中的 libpng/libjpeg (ImageLib)
+image = "0.25"
+
 [[bin]]
 name = "pvz_portable"
 path = "src/main.rs"

@@ -15,10 +15,7 @@ fn main() {
     // TODO: 初始化 SDL2 窗口，运行事件循环
     while !app.close_request {
         app.update();
-        // 约 60fps 的帧率控制
-        // std::thread::sleep(std::time::Duration::from_millis(16));
-        // FIXME: 实际主循环需要 SDL2 事件处理和 OpenGL 渲染
-        break; // 目前没有实际渲染，立即退出
+        std::thread::sleep(std::time::Duration::from_millis(16));
     }
 
     app.shutdown();
